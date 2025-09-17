@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Frontend Search API</title>
+</head>
+<body>
+    <h1>Frontend Search API Test</h1>
+    <div>
+        <input type="text" id="searchInput" placeholder="Search skills..." />
+        <button onclick="testSearch()">Search</button>
+    </div>
+    <div id="results"></div>
+
+    <script>
+        async function testSearch() {
+            const query = document.getElementById('searchInput').value;
+            const resultsDiv = document.getElementById('results');
+            
+            resultsDiv.innerHTML = 'Loading...';
+            
+            try {
+                const params = new URLSearchParams();
+                if (query) params.append('search', query);
+                
+                const url = `http://localhost:5000/api/skills?${params.toString()}`;
+                console.log('Making request to:', url);
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                console.log('Response:', data);
+                
+                if (data.skills && data.skills.length > 0) {
+                    resultsDiv.innerHTML = `
+                        <h3>Found ${data.skills.length} skills:</h3>
+                        <ul>
+                            ${data.skills.map(skill => `
+                                <li>
+                                    <strong>${skill.name}</strong> (${skill.category}) 
+                                    by ${skill.offeredBy.name}
+                                    <br><small>${skill.description}</small>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    `;
+                } else {
+                    resultsDiv.innerHTML = '<p>No skills found</p>';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                resultsDiv.innerHTML = `<p>Error: ${error.message}</p>`;
+            }
+        }
+        
+        // Test on page load
+        window.onload = () => {
+            document.getElementById('searchInput').value = 'python';
+            testSearch();
+        };
+    </script>
+</body>
+</html>

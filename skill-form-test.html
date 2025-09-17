@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skills Form Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            background-color: #e9f7ef;
+            border: 1px solid #27ae60;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .error {
+            background-color: #fdeaea;
+            border: 1px solid #e74c3c;
+            color: #c0392b;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎯 Skills Form Testing Tool</h1>
+    <p>This tool helps you test the skill creation functionality with the new proficiency level and experience fields.</p>
+    
+    <div class="test-container">
+        <h2>📝 Add New Skill</h2>
+        <form id="skillForm">
+            <div class="form-group">
+                <label for="skillName">Skill Name *</label>
+                <input type="text" id="skillName" placeholder="e.g., React, Python, Guitar" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="category">Category *</label>
+                <select id="category" required>
+                    <option value="">Select category</option>
+                    <option value="Technology">Technology</option>
+                    <option value="Language">Language</option>
+                    <option value="Art">Art</option>
+                    <option value="Music">Music</option>
+                    <option value="Sports">Sports</option>
+                    <option value="Cooking">Cooking</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="proficiencyLevel">Proficiency Level</label>
+                <select id="proficiencyLevel">
+                    <option value="">Select your level</option>
+                    <option value="Beginner">Beginner</option>
+                    <option value="Intermediate">Intermediate</option>
+                    <option value="Advanced">Advanced</option>
+                    <option value="Expert">Expert</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="yearsExperience">Years of Experience</label>
+                <input type="number" id="yearsExperience" placeholder="e.g., 3" min="0" max="50">
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Description *</label>
+                <textarea id="description" placeholder="Describe what you can teach, your teaching style, and what students will learn..." required></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="availability">Availability</label>
+                <textarea id="availability" placeholder="When are you available to teach? (e.g., Weekday evenings, Saturday mornings)"></textarea>
+            </div>
+            
+            <button type="submit">Create Skill</button>
+            <button type="button" onclick="clearForm()">Clear Form</button>
+        </form>
+    </div>
+    
+    <div class="test-container">
+        <h2>🔍 Test Results</h2>
+        <div id="result"></div>
+    </div>
+    
+    <div class="test-container">
+        <h2>📊 API Configuration</h2>
+        <div class="form-group">
+            <label for="apiUrl">API Base URL</label>
+            <input type="text" id="apiUrl" value="http://localhost:5000/api">
+        </div>
+        <div class="form-group">
+            <label for="token">Auth Token (Login first in the main app)</label>
+            <input type="text" id="token" placeholder="Bearer token...">
+        </div>
+        <button onclick="testConnection()">Test API Connection</button>
+        <button onclick="loadMySkills()">Load My Skills</button>
+    </div>
+
+    <script>
+        // Test data for quick filling
+        const testData = {
+            name: 'Advanced TypeScript',
+            category: 'Technology',
+            level: 'Advanced',
+            experience: 5,
+            description: 'Learn advanced TypeScript patterns, generics, and type system features for building robust applications.',
+            availability: 'Available weekday evenings and Saturday mornings'
+        };
+
+        function fillTestData() {
+            document.getElementById('skillName').value = testData.name;
+            document.getElementById('category').value = testData.category;
+            document.getElementById('proficiencyLevel').value = testData.level;
+            document.getElementById('yearsExperience').value = testData.experience;
+            document.getElementById('description').value = testData.description;
+            document.getElementById('availability').value = testData.availability;
+        }
+
+        function clearForm() {
+            document.getElementById('skillForm').reset();
+            document.getElementById('result').innerHTML = '';
+        }
+
+        async function testConnection() {
+            const apiUrl = document.getElementById('apiUrl').value;
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                const response = await fetch(`${apiUrl}/`);
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.innerHTML = `<div class="result">✅ API Connection Success: ${data.message}</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="result error">❌ API Connection Failed: ${response.status}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="result error">❌ Connection Error: ${error.message}</div>`;
+            }
+        }
+
+        async function loadMySkills() {
+            const apiUrl = document.getElementById('apiUrl').value;
+            const token = document.getElementById('token').value;
+            const resultDiv = document.getElementById('result');
+            
+            if (!token) {
+                resultDiv.innerHTML = '<div class="result error">❌ Please provide an auth token</div>';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${apiUrl}/skills/my-skills`, {
+                    headers: {
+                        'Authorization': token,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    let html = '<div class="result">✅ Your Skills:<br><br>';
+                    
+                    if (data.skills && data.skills.length > 0) {
+                        data.skills.forEach(skill => {
+                            html += `<strong>${skill.name}</strong><br>`;
+                            html += `Category: ${skill.category}<br>`;
+                            html += `Level: ${skill.level || 'Not specified'}<br>`;
+                            html += `Experience: ${skill.yearsExperience || 0} years<br>`;
+                            html += `Availability: ${skill.availabilityDescription || skill.availability || 'Not specified'}<br>`;
+                            html += `Description: ${skill.description}<br><br>`;
+                        });
+                    } else {
+                        html += 'No skills found.';
+                    }
+                    
+                    html += '</div>';
+                    resultDiv.innerHTML = html;
+                } else {
+                    const errorData = await response.json();
+                    resultDiv.innerHTML = `<div class="result error">❌ Failed to load skills: ${errorData.message || response.status}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="result error">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        document.getElementById('skillForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const apiUrl = document.getElementById('apiUrl').value;
+            const token = document.getElementById('token').value;
+            const resultDiv = document.getElementById('result');
+            
+            if (!token) {
+                resultDiv.innerHTML = '<div class="result error">❌ Please provide an auth token</div>';
+                return;
+            }
+            
+            // Collect form data
+            const skillData = {
+                name: document.getElementById('skillName').value.trim(),
+                category: document.getElementById('category').value,
+                description: document.getElementById('description').value.trim()
+            };
+            
+            // Add optional fields
+            const level = document.getElementById('proficiencyLevel').value;
+            if (level) skillData.level = level;
+            
+            const experience = document.getElementById('yearsExperience').value;
+            if (experience && !isNaN(Number(experience))) {
+                skillData.yearsExperience = Number(experience);
+            }
+            
+            const availability = document.getElementById('availability').value.trim();
+            if (availability) skillData.availabilityDescription = availability;
+            
+            // Validate required fields
+            if (!skillData.name || !skillData.category || !skillData.description) {
+                resultDiv.innerHTML = '<div class="result error">❌ Name, category, and description are required</div>';
+                return;
+            }
+            
+            try {
+                resultDiv.innerHTML = '<div class="result">⏳ Creating skill...</div>';
+                
+                const response = await fetch(`${apiUrl}/skills`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': token,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(skillData)
+                });
+                
+                if (response.ok) {
+                    const createdSkill = await response.json();
+                    let html = '<div class="result">✅ Skill Created Successfully!<br><br>';
+                    html += `<strong>Name:</strong> ${createdSkill.name}<br>`;
+                    html += `<strong>Category:</strong> ${createdSkill.category}<br>`;
+                    html += `<strong>Level:</strong> ${createdSkill.level || 'Not specified'}<br>`;
+                    html += `<strong>Experience:</strong> ${createdSkill.yearsExperience || 0} years<br>`;
+                    html += `<strong>Availability:</strong> ${createdSkill.availabilityDescription || createdSkill.availability || 'Not specified'}<br>`;
+                    html += `<strong>Description:</strong> ${createdSkill.description}<br>`;
+                    html += '</div>';
+                    resultDiv.innerHTML = html;
+                } else {
+                    const errorData = await response.json();
+                    resultDiv.innerHTML = `<div class="result error">❌ Failed to create skill: ${errorData.message || response.status}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="result error">❌ Error: ${error.message}</div>`;
+            }
+        });
+
+        // Add quick fill button
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.querySelector('.test-container');
+            const quickFillBtn = document.createElement('button');
+            quickFillBtn.textContent = 'Fill Test Data';
+            quickFillBtn.onclick = fillTestData;
+            container.querySelector('form').appendChild(quickFillBtn);
+        });
+    </script>
+</body>
+</html>
