@@ -46,6 +46,8 @@ const productionOrigins = [
   // 'https://yourapp.com',
   // 'https://www.yourapp.com',
   // 'https://app.yourapp.com',
+  'https://skillswapthrive.netlify.app', // Your Netlify frontend URL
+  'https://skillswapthrive.netlify.app/', // Your Netlify frontend URL with trailing slash
 ].filter(Boolean); // Remove undefined/empty values
 
 const allowedOrigins = isDevelopment ? developmentOrigins : productionOrigins;
@@ -59,6 +61,16 @@ app.use(cors({
     
     // Check if origin is in allowed list
     if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    
+    // Also check if origin matches but with/without trailing slash
+    const normalizedOrigin = origin && origin.endsWith('/') ? origin.slice(0, -1) : origin;
+    const normalizedAllowedOrigins = allowedOrigins.map(allowedOrigin => 
+      allowedOrigin && allowedOrigin.endsWith('/') ? allowedOrigin.slice(0, -1) : allowedOrigin
+    );
+    
+    if (normalizedAllowedOrigins.includes(normalizedOrigin)) {
       return callback(null, true);
     }
     

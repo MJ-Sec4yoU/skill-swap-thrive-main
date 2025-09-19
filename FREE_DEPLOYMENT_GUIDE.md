@@ -118,8 +118,8 @@ mongodb+srv://skillswap_user:your_password@cluster0.xxxxx.mongodb.net/skillswap?
 4. Add environment variables:
    - `NODE_ENV` = production
    - `MONGODB_URI` = your MongoDB connection string
-   - `JWT_SECRET` = your JWT secret
-   - `FRONTEND_URL` = your Netlify frontend URL (e.g., https://your-app.netlify.app)
+   - `JWT_SECRET` = your JWT secret (at least 32 characters)
+   - `FRONTEND_URL` = your Netlify frontend URL (e.g., https://skillswapthrive.netlify.app)
    - `FRONTEND_URL_2` = your Netlify frontend URL with www if applicable
 5. Click "Create Web Service"
 
@@ -127,7 +127,7 @@ mongodb+srv://skillswap_user:your_password@cluster0.xxxxx.mongodb.net/skillswap?
 
 ### Step 1: Get Your URLs
 1. After deploying to Netlify, you'll get a URL like:
-   `https://your-app.netlify.app`
+   `https://skillswapthrive.netlify.app`
 2. After deploying to Render, you'll get a URL like:
    `https://skillswap-backend.onrender.com`
 
@@ -141,7 +141,7 @@ mongodb+srv://skillswap_user:your_password@cluster0.xxxxx.mongodb.net/skillswap?
 2. **In Render**:
    - Go to your web service → "Environment"
    - Make sure `FRONTEND_URL` is set to your Netlify frontend URL:
-     `https://your-app.netlify.app`
+     `https://skillswapthrive.netlify.app` (without trailing slash)
    - Save changes
 
 ### Step 3: Redeploy Both Services
@@ -217,8 +217,11 @@ After deploying your backend:
    - This is normal when different packages require different versions of the same dependency
 
 2. **CORS Errors**:
-   - Ensure `FRONTEND_URL` in backend matches your frontend URL
+   - Ensure `FRONTEND_URL` in backend matches your frontend URL exactly
    - Check that your frontend URL is in the allowed origins list
+   - If environment variables are not working, the backend code includes a hardcoded fallback for `https://skillswapthrive.netlify.app`
+   - Be careful with trailing slashes - they must match exactly or use the normalized comparison in the code
+   - After changing environment variables, redeploy your services
 
 3. **Database Connection Failures**:
    - Verify MongoDB connection string
