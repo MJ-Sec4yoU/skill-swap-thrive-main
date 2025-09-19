@@ -142,6 +142,8 @@ mongodb+srv://skillswap_user:your_password@cluster0.xxxxx.mongodb.net/skillswap?
    - Go to your web service → "Environment"
    - Make sure `FRONTEND_URL` is set to your Netlify frontend URL:
      `https://skillswapthrive.netlify.app` (without trailing slash)
+   - Add `MONGODB_URI` with your MongoDB connection string
+   - Add `JWT_SECRET` with a secure random string (at least 32 characters)
    - Save changes
 
 ### Step 3: Redeploy Both Services
@@ -237,11 +239,22 @@ After deploying your backend:
    - Make sure your Render service is configured to use the `backend` directory as root
    - Verify that build and start commands are correct (`npm install` and `npm start`)
    - Check that all required environment variables are set
+   - Ensure `MONGODB_URI` and `JWT_SECRET` are properly configured
 
 6. **Content Security Policy (CSP) Errors**:
    - The frontend's CSP must allow connections to your backend URL
    - If you change your backend URL, update the CSP in index.html
    - Make sure to redeploy after updating CSP
+
+7. **Rate Limiting Errors**:
+   - When deploying behind proxies (like Render), Express needs to trust the proxy
+   - The backend code now includes `app.set('trust proxy', 1)` to fix this issue
+   - If you still encounter rate limiting issues, check the Render logs for more details
+
+8. **File Upload Errors**:
+   - The backend now properly handles avatar uploads and cleanup
+   - Make sure the uploads directory exists and is writable
+   - Check that file sizes don't exceed the 5MB limit
 
 ## 📈 Next Steps
 

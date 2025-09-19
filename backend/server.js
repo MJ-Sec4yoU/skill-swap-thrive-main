@@ -18,6 +18,9 @@ dotenv.config();
 
 const app = express();
 
+// Enable trust proxy for rate limiting to work correctly behind proxies (like Render)
+app.set('trust proxy', 1);
+
 // Security middleware - Apply first
 app.use(securityHeaders());
 app.use(securityLogger);
