@@ -129,7 +129,7 @@ router.get('/search', userValidation.search, async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: 'Server error', error });
   }
-};
+});
 
 // Middleware to conditionally apply multer only for multipart/form-data
 const conditionalUpload = (req, res, next) => {
@@ -221,4 +221,4 @@ router.put('/profile', auth, conditionalUpload, userValidation.updateProfile, as
   }
 });
 
-// ... rest of the file ...
+module.exports = router;

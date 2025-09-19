@@ -240,6 +240,7 @@ After deploying your backend:
    - Verify that build and start commands are correct (`npm install` and `npm start`)
    - Check that all required environment variables are set
    - Ensure `MONGODB_URI` and `JWT_SECRET` are properly configured
+   - Verify that all route files have proper syntax and are correctly closed
 
 6. **Content Security Policy (CSP) Errors**:
    - The frontend's CSP must allow connections to your backend URL
@@ -255,6 +256,11 @@ After deploying your backend:
    - The backend now properly handles avatar uploads and cleanup
    - Make sure the uploads directory exists and is writable
    - Check that file sizes don't exceed the 5MB limit
+
+9. **Syntax Errors**:
+   - If you encounter syntax errors during deployment, check that all JavaScript files are properly closed
+   - Ensure all functions and objects have proper opening and closing brackets
+   - Verify that all route files export their routers correctly
 
 ## 📈 Next Steps
 
