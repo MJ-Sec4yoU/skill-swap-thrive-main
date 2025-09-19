@@ -124,12 +124,20 @@ const ExploreSkills = () => {
     }
     
     try {
-      // Create a schedule request
+      // Set default date/time for the session request (today + 1 week, 2 PM - 3 PM)
+      const defaultDate = new Date();
+      defaultDate.setDate(defaultDate.getDate() + 7);
+      const dateString = defaultDate.toISOString().split('T')[0];
+      
+      // Create a schedule request with proper payload structure
       const result = await apiService.createSchedule({
-        teacherId: skill.offeredBy._id,
-        skillId: skill._id,
-        type: 'learning',
-        status: 'pending',
+        student: user._id, // Current user is the student
+        teacher: skill.offeredBy._id, // The skill provider is the teacher
+        skill: skill._id,
+        date: dateString,
+        startTime: "14:00", // 2:00 PM
+        endTime: "15:00", // 3:00 PM
+        status: 'Pending',
         notes: `Learning session request for ${skill.name}`
       });
       

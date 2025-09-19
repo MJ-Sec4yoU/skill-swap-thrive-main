@@ -148,16 +148,37 @@ swap-learn-thrive/
 
 ## 🌐 Deployment
 
-### Frontend Deployment
-1. Build the project: `npm run build`
-2. Deploy the `dist` folder to platforms like Vercel, Netlify, or AWS S3
-3. Update environment variables for production
+### Free Deployment Options
 
-### Backend Deployment
-1. Deploy to platforms like Heroku, Railway, or AWS
-2. Set up MongoDB Atlas for production database
-3. Configure environment variables
-4. Update CORS settings for production frontend URL
+Detailed deployment instructions are available in [FREE_DEPLOYMENT_GUIDE.md](FREE_DEPLOYMENT_GUIDE.md)
+
+#### Quick Deployment Summary:
+
+1. **Frontend (Netlify)**:
+   - Connect your GitHub repository
+   - Set build command to `npm run build`
+   - Set publish directory to `dist`
+   - Add environment variables from [.env.production](.env.production)
+
+2. **Backend (Render)**:
+   - Connect your GitHub repository
+   - Set root directory to `backend`
+   - Set build command to `npm install`
+   - Set start command to `npm start`
+   - Add environment variables from [backend/.env.production](backend/.env.production)
+
+3. **Database (MongoDB Atlas)**:
+   - Create a free cluster
+   - Configure database user and network access
+   - Update MongoDB connection string in backend environment variables
+
+### Manual Deployment
+1. Build the frontend: `npm run build`
+2. Deploy the `dist` folder to any static hosting service
+3. Deploy the backend to any Node.js hosting service
+4. Set up MongoDB Atlas for production database
+5. Configure environment variables on both frontend and backend
+6. Update CORS settings for production frontend URL
 
 ## 🤝 Contributing
 

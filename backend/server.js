@@ -198,6 +198,15 @@ app.get('/', (req, res) => {
   res.json({ message: 'Welcome to Skill Swap API' });
 });
 
+// Health check endpoint for Render free tier (prevents sleeping)
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+
 // Routes with specific rate limiting
 app.use('/api/auth', rateLimiters.auth, userRateLimit, authRoutes);
 app.use('/api/users', userRoutes);
