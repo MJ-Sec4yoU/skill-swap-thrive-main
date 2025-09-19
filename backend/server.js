@@ -123,16 +123,18 @@ app.use('/uploads', (req, res, next) => {
   res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
   
   // Add additional security headers
-  res.setHeader('Access-Control-Allow-Methods', 'GET');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
   res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
   next();
 });
+
 app.use('/uploads', express.static('uploads', {
   setHeaders: (res) => {
     // Ensure these headers are also set when serving static files
-    res.setHeader('Cross-Origin-Resource-Policy', isDevelopment ? 'cross-origin' : 'same-site');
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    res.setHeader('Access-Control-Allow-Origin', '*');
   }
 }));
 
