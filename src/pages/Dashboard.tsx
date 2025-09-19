@@ -20,7 +20,7 @@ import {
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
-import { apiService, buildAssetUrl, API_BASE_URL } from "@/lib/api";
+import { apiService, buildAssetUrl, API_BASE_URL, ASSET_BASE_URL } from "@/lib/api";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -240,13 +240,12 @@ const Dashboard = () => {
                             const target = e.target as HTMLImageElement;
                             console.log('Avatar load error, trying direct path');
                             // Try direct path as fallback
-                            const baseUrl = API_BASE_URL.replace('/api', '');
                             if (profile.profile.avatar.startsWith('uploads/')) {
                               target.onerror = null;
-                              target.src = `${baseUrl}/${profile.profile.avatar}`;
+                              target.src = `${ASSET_BASE_URL}/${profile.profile.avatar}`;
                             } else {
                               target.onerror = null;
-                              target.src = `${baseUrl}/uploads/${profile.profile.avatar}`;
+                              target.src = `${ASSET_BASE_URL}/uploads/${profile.profile.avatar}`;
                             }
                           }}
                         />

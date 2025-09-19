@@ -119,7 +119,8 @@ app.use('/uploads', (req, res, next) => {
   
   // Add Cross-Origin Resource Policy header
   // In development, we'll use cross-origin to allow access from different ports
-  res.setHeader('Cross-Origin-Resource-Policy', isDevelopment ? 'cross-origin' : 'same-site');
+  // In production, we need to allow cross-origin for Netlify frontend to access avatars
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
   
   // Add additional security headers
   res.setHeader('Access-Control-Allow-Methods', 'GET');
