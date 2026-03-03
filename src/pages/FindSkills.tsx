@@ -1,126 +1,91 @@
-import Header from '@/components/Header';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Search, 
-  Filter, 
-  MapPin, 
-  Star, 
-  Clock, 
-  BookOpen, 
-  User,
-  Users,
-  MessageSquare,
-  Heart,
-  TrendingUp,
-  Award
-} from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { apiService } from '@/lib/api';
-import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
-
-interface Skill {
-  _id: string;
-  name: string;
-  description: string;
-  category: string;
-  level: string;
-  tags: string[];
-  offeredBy: {
-    _id: string;
-    name: string;
-    profile?: {
-      avatar?: string;
-      location?: string;
-      bio?: string;
-    };
-  };
-  createdAt: string;
-}
-
-interface User {
-  _id: string;
-  name: string;
-  email: string;
-  profile?: {
-    avatar?: string;
-    location?: string;
-    bio?: string;
-    profileCompletion?: number;
-  };
-  skillsTeaching?: Array<{
-    skill: string;
-    level: string;
-    experience?: number;
-  }>;
-  ratings?: {
-    average: number;
-    count: number;
-  };
-}
+import Header from "@/components/Header";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Search, Filter, Star, Calendar, MapPin, Grid, List, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { apiService } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 const FindSkills = () => {
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const navigate = useNavigate();
-  
-  const [activeTab, setActiveTab] = useState('skills');
-  const [skills, setSkills] = useState<Skill[]>([]);
-  const [teachers, setTeachers] = useState<User[]>([]);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [skillProviders, setSkillProviders] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({
     category: 'all',
     level: 'all',
-    location: ''
+    sortBy: 'createdAt',
+    sortOrder: 'desc'
   });
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    itemsPerPage: 20
+  });
+  
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [searchParams] = useSearchParams();
 
-  const loadSkills = async () => {
+  // Initialize search term from URL parameters
+  useEffect(() => {
+    const urlSearch = searchParams.get('search');
+    if (urlSearch) {
+      setSearchTerm(urlSearch);
+    }
+  }, [searchParams]);
+
+  const categories = [
+    "All Categories",
+    "Technology",
+    "Language", 
+    "Art",
+    "Music",
+    "Sports",
+    "Cooking",
+    "Other"
+  ];
+
+  // Fetch skills data
+  const fetchSkills = async () => {
     setLoading(true);
     try {
-      const params: any = {};
-      if (searchQuery) params.search = searchQuery;
-      if (filters.category && filters.category !== 'all') params.category = filters.category;
-      if (filters.level && filters.level !== 'all') params.level = filters.level;
-      
+      const params = {
+        search: searchTerm || undefined,
+        category: filters.category !== 'all' ? filters.category : undefined,
+        level: filters.level !== 'all' ? filters.level : undefined,
+        sortBy: filters.sortBy,
+        sortOrder: filters.sortOrder,
+        page: pagination.currentPage,
+        limit: pagination.itemsPerPage
+      };
+
       const result = await apiService.getSkills(params);
       
-      if (result.data && typeof result.data === 'object' && 'skills' in result.data) {
-        const skillsData = (result.data as any).skills || [];
-        setSkills(skillsData);
+      if (result.data) {
+        const responseData = result.data as any;
+        const skills = responseData.skills || [];
+        
+        setSkillProviders(skills);
+        setPagination(responseData.pagination || pagination);
       } else {
-        setSkills([]);
+        toast({
+          title: "Error",
+          description: result.error || "Failed to fetch skills",
+          variant: "destructive"
+        });
       }
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to load skills",
-        variant: "destructive"
-      });
-      setSkills([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadTeachers = async () => {
-    setLoading(true);
-    try {
-      const result = await apiService.getUsers(20);
-      if (result.data && typeof result.data === 'object' && 'users' in result.data) {
-        setTeachers((result.data as { users: User[] }).users || []);
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to load teachers",
+        description: "An error occurred while fetching skills",
         variant: "destructive"
       });
     } finally {
@@ -128,282 +93,301 @@ const FindSkills = () => {
     }
   };
 
-  const sendMessage = (teacherId: string) => {
-    navigate('/messages', { state: { recipientId: teacherId } });
-  };
-
-  const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase();
-  };
-
-  const getSkillsByCategory = () => {
-    const categories = skills.reduce((acc, skill) => {
-      if (!acc[skill.category]) acc[skill.category] = [];
-      acc[skill.category].push(skill);
-      return acc;
-    }, {} as Record<string, Skill[]>);
-    return categories;
-  };
-
+  // Load data on component mount and when filters change
   useEffect(() => {
-    if (activeTab === 'skills') {
-      loadSkills();
-    } else {
-      loadTeachers();
-    }
-  }, [activeTab, filters]);
+    fetchSkills();
+  }, [filters, pagination.currentPage]);
 
-  // Debounce search to avoid too many API calls
+  // Debounced search - separate from other filters
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (activeTab === 'skills') {
-        loadSkills();
+    const timer = setTimeout(() => {
+      if (pagination.currentPage === 1) {
+        fetchSkills();
+      } else {
+        setPagination(prev => ({ ...prev, currentPage: 1 }));
       }
     }, 300);
-    return () => clearTimeout(timeoutId);
-  }, [searchQuery]);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Handle action functions
+  const handleRequestSession = async (skill: any) => {
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to request a session",
+        variant: "destructive"
+      });
+      navigate('/login');
+      return;
+    }
+    
+    try {
+      // Create a direct session request without requiring skill matching
+      // This allows any user to request sessions from any teacher regardless of skill compatibility
+      const result = await apiService.requestDirectSession({
+        teacherId: skill.offeredBy._id,
+        skillId: skill._id,
+        skillName: skill.name,
+        message: `Hi! I would like to request a learning session for ${skill.name}. Looking forward to learning from you!`
+      });
+      
+      if (result.data) {
+        toast({
+          title: "Session Request Sent",
+          description: `Your session request for ${skill.name} has been sent to ${skill.offeredBy?.name || 'the teacher'}!`,
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to send session request",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Request session error:', error);
+      toast({
+        title: "Error",
+        description: "An error occurred while sending your session request",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleFilterChange = (key: string, value: string) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+    setPagination(prev => ({ ...prev, currentPage: 1 }));
+  };
 
   return (
     <div className="min-h-screen bg-background">
       <Header isLoggedIn={!!user} />
       
       <main className="container py-8">
+        {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Discover Skills & Teachers</h1>
-          <p className="text-muted-foreground">
-            Find the perfect skill to learn or connect with experienced teachers
-          </p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Learn New Skills</h1>
+          <p className="text-muted-foreground">Discover expert mentors and teachers for any skill you want to learn</p>
         </div>
 
         {/* Search and Filters */}
-        <Card className="mb-6">
-          <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="md:col-span-2">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search skills or teachers..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
-                  />
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+          {/* Search */}
+          <div className="lg:col-span-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input
+                placeholder="Search skills, technologies, or topics..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          </div>
+
+          {/* Category Filter */}
+          <Select value={filters.category} onValueChange={(value) => handleFilterChange('category', value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Category" />
+            </SelectTrigger>
+            <SelectContent>
+              {categories.map((category) => (
+                <SelectItem key={category} value={category === "All Categories" ? "all" : category}>
+                  {category}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* View Mode Toggle */}
+          <div className="flex items-center gap-2">
+            <Button
+              variant={viewMode === 'grid' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('grid')}
+            >
+              <Grid className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === 'list' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('list')}
+            >
+              <List className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Filters Sidebar */}
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-sm">
+                  <Filter className="h-4 w-4" />
+                  Filters
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Experience Level */}
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Experience Level</label>
+                  <Select value={filters.level} onValueChange={(value) => handleFilterChange('level', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Any level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Any level</SelectItem>
+                      <SelectItem value="Beginner">Beginner</SelectItem>
+                      <SelectItem value="Intermediate">Intermediate</SelectItem>
+                      <SelectItem value="Advanced">Advanced</SelectItem>
+                      <SelectItem value="Expert">Expert</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-              </div>
-              
-              <Select value={filters.category} onValueChange={(value) => setFilters(prev => ({ ...prev, category: value }))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Category" />
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Results */}
+          <div className="lg:col-span-3">
+            <div className="flex items-center justify-between mb-6">
+              <p className="text-sm text-muted-foreground">
+                {loading ? "Loading..." : `Showing ${pagination.totalItems} results`}
+              </p>
+              <Select value={filters.sortBy} onValueChange={(value) => handleFilterChange('sortBy', value)}>
+                <SelectTrigger className="w-48">
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  <SelectItem value="Technology">Technology</SelectItem>
-                  <SelectItem value="Language">Language</SelectItem>
-                  <SelectItem value="Art">Art</SelectItem>
-                  <SelectItem value="Music">Music</SelectItem>
-                  <SelectItem value="Sports">Sports</SelectItem>
-                  <SelectItem value="Cooking">Cooking</SelectItem>
-                </SelectContent>
-              </Select>
-              
-              <Select value={filters.level} onValueChange={(value) => setFilters(prev => ({ ...prev, level: value }))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Level" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Levels</SelectItem>
-                  <SelectItem value="Beginner">Beginner</SelectItem>
-                  <SelectItem value="Intermediate">Intermediate</SelectItem>
-                  <SelectItem value="Advanced">Advanced</SelectItem>
-                  <SelectItem value="Expert">Expert</SelectItem>
+                  <SelectItem value="createdAt">Newest first</SelectItem>
+                  <SelectItem value="name">Name A-Z</SelectItem>
+                  <SelectItem value="level">Level</SelectItem>
+                  <SelectItem value="category">Category</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="skills" className="flex items-center gap-2">
-              <BookOpen className="h-4 w-4" />
-              Skills ({skills.length})
-            </TabsTrigger>
-            <TabsTrigger value="teachers" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Teachers ({teachers.length})
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="skills" className="mt-6">
             {loading ? (
-              <div className="flex justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin" />
+                <span className="ml-2">Loading skills...</span>
+              </div>
+            ) : skillProviders.length === 0 ? (
+              <div className="text-center py-12">
+                <Search className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <h3 className="text-lg font-semibold mb-2">No skills found</h3>
+                <p className="text-muted-foreground">Try adjusting your search or filters</p>
               </div>
             ) : (
-              <div className="space-y-8">
-                {Object.entries(getSkillsByCategory()).map(([category, categorySkills]) => (
-                  <div key={category}>
-                    <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                      <TrendingUp className="h-5 w-5" />
-                      {category} ({categorySkills.length})
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {categorySkills.map((skill) => (
-                        <Card key={skill._id} className="hover:shadow-lg transition-shadow">
-                          <CardHeader className="pb-3">
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <CardTitle className="text-lg">{skill.name}</CardTitle>
-                                <div className="flex gap-2 mt-2">
-                                  <Badge variant="outline">{skill.level}</Badge>
-                                  <Badge variant="secondary">{skill.category}</Badge>
-                                </div>
-                              </div>
-                            </div>
-                          </CardHeader>
-                          
-                          <CardContent className="space-y-4">
-                            <p className="text-sm text-muted-foreground">
-                              {skill.description}
-                            </p>
-                            
-                            <div className="flex items-center gap-2">
-                              <Avatar className="h-8 w-8">
-                                <AvatarFallback className="text-xs">
-                                  {getInitials(skill.offeredBy.name)}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div>
-                                <p className="text-sm font-medium">{skill.offeredBy.name}</p>
-                                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                  <MapPin className="h-3 w-3" />
-                                  {skill.offeredBy.profile?.location || 'Location not specified'}
-                                </div>
-                              </div>
-                            </div>
-                            
-                            <div className="flex gap-2">
-                              <Button 
-                                size="sm" 
-                                className="flex-1"
-                                onClick={() => sendMessage(skill.offeredBy._id)}
-                              >
-                                <MessageSquare className="h-4 w-4 mr-2" />
-                                Contact
-                              </Button>
-                              <Button size="sm" variant="outline">
-                                <Heart className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-                
-                {skills.length === 0 && !loading && (
-                  <div className="text-center py-12">
-                    <BookOpen className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-                    <h3 className="text-xl font-semibold mb-2">No skills found</h3>
-                    <p className="text-muted-foreground">Try adjusting your search criteria</p>
-                  </div>
-                )}
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="teachers" className="mt-6">
-            {loading ? (
-              <div className="flex justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {teachers.map((teacher) => (
-                  <Card key={teacher._id} className="hover:shadow-lg transition-shadow">
-                    <CardHeader>
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-12 w-12">
-                          <AvatarFallback>
-                            {getInitials(teacher.name)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                          <CardTitle className="text-lg">{teacher.name}</CardTitle>
-                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                            <MapPin className="h-3 w-3" />
-                            {teacher.profile?.location || 'Location not specified'}
-                          </div>
+              <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'}`}>
+                {skillProviders.map((skill) => (
+                  <Card key={skill._id} className="hover:shadow-lg transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="flex items-start gap-4">
+                        {/* Avatar */}
+                        <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center text-primary-foreground font-medium">
+                          {skill.offeredBy?.name ? skill.offeredBy.name.charAt(0).toUpperCase() : 'U'}
                         </div>
-                      </div>
-                    </CardHeader>
-                    
-                    <CardContent className="space-y-4">
-                      {teacher.profile?.bio && (
-                        <p className="text-sm text-muted-foreground">
-                          {teacher.profile.bio.length > 100 
-                            ? `${teacher.profile.bio.substring(0, 100)}...` 
-                            : teacher.profile.bio}
-                        </p>
-                      )}
-                      
-                      {teacher.skillsTeaching && teacher.skillsTeaching.length > 0 && (
-                        <div>
-                          <p className="text-sm font-medium mb-2">Teaching Skills:</p>
-                          <div className="flex flex-wrap gap-1">
-                            {teacher.skillsTeaching.slice(0, 3).map((skill, index) => (
-                              <Badge key={index} variant="secondary" className="text-xs">
-                                {typeof skill === 'string' ? skill : skill.skill}
-                              </Badge>
-                            ))}
-                            {teacher.skillsTeaching.length > 3 && (
+                        
+                        {/* Content */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between mb-2">
+                            <div>
+                              <h3 className="font-semibold text-foreground">{skill.name}</h3>
+                              <p className="text-sm text-muted-foreground">by {skill.offeredBy?.name || 'Unknown'}</p>
+                            </div>
+                            <div className="text-right">
                               <Badge variant="outline" className="text-xs">
-                                +{teacher.skillsTeaching.length - 3} more
+                                {skill.level}
                               </Badge>
+                              <p className="text-xs text-muted-foreground mt-1">{skill.category}</p>
+                            </div>
+                          </div>
+                          
+                          <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                            {skill.description}
+                          </p>
+                          
+                          {/* Tags */}
+                          {skill.tags && skill.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mb-3">
+                              {skill.tags.slice(0, 3).map((tag, index) => (
+                                <Badge key={index} variant="secondary" className="text-xs">
+                                  {tag}
+                                </Badge>
+                              ))}
+                              {skill.tags.length > 3 && (
+                                <Badge variant="outline" className="text-xs">
+                                  +{skill.tags.length - 3} more
+                                </Badge>
+                              )}
+                            </div>
+                          )}
+                          
+                          {/* Meta Info */}
+                          <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4">
+                            <div className="flex items-center gap-1">
+                              <Calendar className="h-3 w-3" />
+                              {skill.availability || 'Available'}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <MapPin className="h-3 w-3" />
+                              {skill.offeredBy?.profile?.location || 'Location not specified'}
+                            </div>
+                            {skill.offeredBy?.ratings?.average && (
+                              <div className="flex items-center gap-1">
+                                <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                                {skill.offeredBy.ratings.average.toFixed(1)} ({skill.offeredBy.ratings.count})
+                              </div>
                             )}
                           </div>
+                          
+                          {/* Actions */}
+                          <div className="flex gap-2">
+                            <Button 
+                              size="sm" 
+                              className="flex-1"
+                              onClick={() => handleRequestSession(skill)}
+                            >
+                              Request Session
+                            </Button>
+                          </div>
                         </div>
-                      )}
-                      
-                      {teacher.ratings && teacher.ratings.count > 0 && (
-                        <div className="flex items-center gap-2">
-                          <Star className="h-4 w-4 text-yellow-500" />
-                          <span className="text-sm">
-                            {teacher.ratings.average.toFixed(1)} ({teacher.ratings.count} reviews)
-                          </span>
-                        </div>
-                      )}
-                      
-                      <div className="flex gap-2">
-                        <Button 
-                          size="sm" 
-                          className="flex-1"
-                          onClick={() => sendMessage(teacher._id)}
-                        >
-                          <MessageSquare className="h-4 w-4 mr-2" />
-                          Message
-                        </Button>
-                        <Button size="sm" variant="outline">
-                          <User className="h-4 w-4" />
-                        </Button>
                       </div>
                     </CardContent>
                   </Card>
                 ))}
-                
-                {teachers.length === 0 && !loading && (
-                  <div className="text-center py-12 col-span-full">
-                    <Users className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-                    <h3 className="text-xl font-semibold mb-2">No teachers found</h3>
-                    <p className="text-muted-foreground">Try adjusting your search criteria</p>
-                  </div>
-                )}
               </div>
             )}
-          </TabsContent>
-        </Tabs>
+            
+            {/* Pagination */}
+            {pagination.totalPages > 1 && (
+              <div className="mt-8 flex items-center justify-center gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setPagination(prev => ({ ...prev, currentPage: prev.currentPage - 1 }))}
+                  disabled={pagination.currentPage === 1}
+                >
+                  Previous
+                </Button>
+                <span className="text-sm text-muted-foreground">
+                  Page {pagination.currentPage} of {pagination.totalPages}
+                </span>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setPagination(prev => ({ ...prev, currentPage: prev.currentPage + 1 }))}
+                  disabled={pagination.currentPage === pagination.totalPages}
+                >
+                  Next
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
       </main>
     </div>
   );

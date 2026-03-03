@@ -22,7 +22,7 @@ router.get('/', auth, async (req, res) => {
 // Create a new schedule
 router.post('/', auth, async (req, res) => {
   try {
-    const { student, teacher, skill, date, startTime, endTime, status, notes, meetingLink } = req.body;
+    const { student, teacher, skill, date, startTime, endTime, status, notes, meetingLink, description } = req.body;
     
     // Validate required fields
     if (!student && !teacher) {
@@ -57,7 +57,8 @@ router.post('/', auth, async (req, res) => {
       endTime,
       status: status || 'Pending',
       notes,
-      meetingLink
+      meetingLink,
+      description
     };
     
     const schedule = new Schedule(scheduleData);
@@ -119,8 +120,8 @@ router.delete('/:id', auth, async (req, res) => {
     if (!schedule.student.equals(req.user._id) && !schedule.teacher.equals(req.user._id)) {
       return res.status(403).json({ message: 'Unauthorized' });
     }
-    await schedule.remove();
-    res.json({ message: 'Schedule deleted' });
+    await Schedule.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Schedule deleted successfully' });
   } catch (error) {
     console.error('Delete schedule failed:', error);
     res.status(500).json({ message: 'Server error', error: error.message });

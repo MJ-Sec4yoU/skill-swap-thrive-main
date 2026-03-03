@@ -8,28 +8,24 @@ const HowItWorksSection = () => {
 
   const steps = [
     {
-      number: "1",
       icon: UserPlus,
       title: "Create Your Profile",
       description: "Set up your profile with skills you can teach and want to learn. Upload your portfolio and set availability.",
       details: ["Add your expertise", "Set learning goals", "Upload credentials"]
     },
     {
-      number: "2", 
       icon: Search,
       title: "Find Your Match",
       description: "Browse skilled professionals or get AI-powered recommendations based on your interests and goals.",
       details: ["Smart matching algorithm", "Filter by skills & availability", "View verified profiles"]
     },
     {
-      number: "3",
       icon: MessageSquare, 
       title: "Connect & Plan",
       description: "Start conversations, schedule sessions, and create structured learning plans with milestones.",
       details: ["Real-time messaging", "Calendar integration", "Goal setting tools"]
     },
     {
-      number: "4",
       icon: CheckCircle,
       title: "Learn & Earn",
       description: "Participate in interactive sessions, track progress, and earn verified certificates upon completion.",
@@ -54,15 +50,10 @@ const HowItWorksSection = () => {
             <div key={index} className="relative">
               <Card className="h-full hover:shadow-lg transition-shadow duration-300">
                 <CardContent className="p-6 text-center">
-                  {/* Step Number */}
+                  {/* Step Icon */}
                   <div className="relative mb-6">
-                    <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-gradient-primary text-primary-foreground text-xl font-bold mb-4">
-                      {step.number}
-                    </div>
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                      <div className="h-20 w-20 bg-primary/10 rounded-full flex items-center justify-center">
-                        <step.icon className="h-8 w-8 text-primary" />
-                      </div>
+                    <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-gradient-primary text-primary-foreground mb-4">
+                      <step.icon className="h-10 w-10" />
                     </div>
                   </div>
 

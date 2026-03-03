@@ -24,9 +24,6 @@ const Header = ({ isLoggedIn = false, hideDashboard = false }: { isLoggedIn?: bo
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-6">
-          <Link to="/explore" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-            Explore Skills
-          </Link>
           <Link to="/how-it-works" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             How It Works
           </Link>
@@ -44,9 +41,6 @@ const Header = ({ isLoggedIn = false, hideDashboard = false }: { isLoggedIn?: bo
                   Dashboard
                 </Button>
               )}
-              <Button variant="ghost" onClick={() => navigate("/matches")}>
-                Matches
-              </Button>
               <Button variant="outline" onClick={handleLogout}>
                 Logout
               </Button>
@@ -76,9 +70,6 @@ const Header = ({ isLoggedIn = false, hideDashboard = false }: { isLoggedIn?: bo
       {isMenuOpen && (
         <div className="md:hidden border-t border-border bg-background/95 backdrop-blur">
           <div className="container py-4 space-y-4">
-            <Link to="/explore" className="block text-sm font-medium text-muted-foreground hover:text-foreground">
-              Explore Skills
-            </Link>
             <Link to="/how-it-works" className="block text-sm font-medium text-muted-foreground hover:text-foreground">
               How It Works
             </Link>
@@ -93,9 +84,6 @@ const Header = ({ isLoggedIn = false, hideDashboard = false }: { isLoggedIn?: bo
                       Dashboard
                     </Button>
                   )}
-                  <Button variant="ghost" onClick={() => navigate("/matches")}>
-                    Matches
-                  </Button>
                   <Button variant="outline" onClick={handleLogout}>
                     Logout
                   </Button>

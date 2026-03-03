@@ -11,7 +11,7 @@ const HeroSection = () => {
 
   const handleSearch = () => {
     if (searchTerm.trim()) {
-      navigate(`/explore?search=${encodeURIComponent(searchTerm)}`);
+      navigate(`/learn?search=${encodeURIComponent(searchTerm)}`);
     }
   };
 
@@ -23,19 +23,22 @@ const HeroSection = () => {
 
   return (
     <section className="relative overflow-hidden bg-gradient-hero min-h-[80vh] flex items-center">
-      {/* Background Elements */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary-glow/20" />
-      <div 
-        className="absolute inset-0 opacity-10 bg-cover bg-center"
-        style={{ backgroundImage: `url(${heroImage})` }}
-      />
+      {/* Enhanced Background Elements for SkillSwap */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-primary-glow/30" />
+      
+      {/* Abstract geometric pattern representing skill exchange */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-white blur-3xl"></div>
+        <div className="absolute bottom-1/3 right-1/4 w-48 h-48 rounded-full bg-primary-glow blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full bg-white blur-3xl"></div>
+      </div>
       
       <div className="container relative z-10 text-center text-white">
         <div className="mx-auto max-w-4xl">
           <h1 className="text-4xl font-bold tracking-tight sm:text-6xl mb-6">
-            Learn Any Skill,{" "}
+            Swap Skills,{" "}
             <span className="bg-gradient-to-r from-white to-primary-glow bg-clip-text text-transparent">
-              Teach What You Know
+              Grow Together
             </span>
           </h1>
           

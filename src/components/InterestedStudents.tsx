@@ -37,7 +37,7 @@ interface InterestedStudent {
     level: string;
   };
   matchScore: number;
-  factors: {
+  factors?: {
     skillCompatibility?: number;
     locationDistance?: number;
     ratingScore?: number;
@@ -62,21 +62,28 @@ export const InterestedStudents = () => {
     
     try {
       const result = await apiService.getInterestedStudents();
-      const data = result.data as any;
+      console.log('Interested students result:', result);
       
-      if (data && data.interestedStudents) {
-        setInterestedStudents(data.interestedStudents);
+      if (result.data) {
+        const data = result.data as any;
+        if (data && data.interestedStudents && Array.isArray(data.interestedStudents)) {
+          setInterestedStudents(data.interestedStudents);
+        } else {
+          console.log('No interested students array found in response:', data);
+          setInterestedStudents([]);
+        }
+      } else if (result.error) {
+        console.error('Error loading interested students:', result.error);
+        setError(result.error);
+        setInterestedStudents([]);
       } else {
+        console.log('Unexpected response format:', result);
         setInterestedStudents([]);
       }
     } catch (err) {
-      console.error('Error loading interested students:', err);
+      console.error('Exception loading interested students:', err);
       setError('Failed to load interested students');
-      toast({
-        title: "Error",
-        description: "Failed to load interested students",
-        variant: "destructive"
-      });
+      setInterestedStudents([]);
     } finally {
       setLoading(false);
     }
@@ -265,13 +272,13 @@ export const InterestedStudents = () => {
                   
                   {/* Match Factors */}
                   <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-                    {match.factors.skillCompatibility && (
+                    {match.factors?.skillCompatibility && (
                       <span>Skill Match: {match.factors.skillCompatibility}%</span>
                     )}
-                    {match.factors.locationDistance && (
+                    {match.factors?.locationDistance && (
                       <span>• Location: {match.factors.locationDistance}%</span>
                     )}
-                    {match.factors.experienceLevel && (
+                    {match.factors?.experienceLevel && (
                       <span>• Experience: {match.factors.experienceLevel}%</span>
                     )}
                   </div>

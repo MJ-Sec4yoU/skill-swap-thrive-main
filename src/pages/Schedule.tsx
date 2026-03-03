@@ -5,8 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar } from "@/components/ui/calendar";
+
 import { 
   Calendar as CalendarIcon, 
   Clock, 
@@ -26,7 +25,7 @@ import { apiService } from "@/lib/api";
 
 const Schedule = () => {
   const { user } = useAuth();
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+
   const [showNewSessionForm, setShowNewSessionForm] = useState(false);
   const [sessions, setSessions] = useState<any[]>([]);
   const [skills, setSkills] = useState<any[]>([]);
@@ -40,7 +39,8 @@ const Schedule = () => {
     startTime: "",
     endTime: "",
     notes: "",
-    meetingLink: ""
+    meetingLink: "",
+    description: ""
   });
 
   // Edit state
@@ -52,7 +52,8 @@ const Schedule = () => {
     endTime: "",
     notes: "",
     meetingLink: "",
-    status: "Pending"
+    status: "Pending",
+    description: ""
   });
 
   const loadData = async () => {
@@ -77,6 +78,7 @@ const Schedule = () => {
           type: s.student?._id === user?._id ? 'learning' : 'teaching',
           format: s.meetingLink ? 'Video Call' : 'N/A',
           status: (s.status || 'Pending').toLowerCase(),
+          description: s.description || s.notes || '',
           raw: s,
         }));
       setSessions(mapped);
@@ -152,6 +154,7 @@ const Schedule = () => {
       status: 'Pending',
       notes: form.notes,
       meetingLink: form.meetingLink,
+      description: form.description,
     };
     
     const res = await apiService.createSchedule(payload);
@@ -161,14 +164,28 @@ const Schedule = () => {
     }
     
     setShowNewSessionForm(false);
-    setForm({ skillId: "", date: "", startTime: "", endTime: "", notes: "", meetingLink: "" });
+    setForm({ skillId: "", date: "", startTime: "", endTime: "", notes: "", meetingLink: "", description: "" });
     await loadData();
   };
 
   const handleDelete = async (id: string) => {
-    const res = await apiService.deleteSchedule(id);
-    if (res.error) { setError(res.error); return; }
-    await loadData();
+    // Add confirmation dialog
+    if (!window.confirm('Are you sure you want to delete this session? This action cannot be undone.')) {
+      return;
+    }
+    
+    try {
+      setError(null);
+      const res = await apiService.deleteSchedule(id);
+      if (res.error) { 
+        setError(res.error); 
+        return; 
+      }
+      await loadData();
+    } catch (err) {
+      console.error('Error deleting schedule:', err);
+      setError('Failed to delete schedule. Please try again.');
+    }
   };
 
   const startEdit = (session: any) => {
@@ -181,7 +198,8 @@ const Schedule = () => {
       endTime: session.raw?.endTime || "",
       notes: session.raw?.notes || "",
       meetingLink: session.raw?.meetingLink || "",
-      status: session.raw?.status || 'Pending'
+      status: session.raw?.status || 'Pending',
+      description: session.raw?.description || ""
     });
   };
 
@@ -219,6 +237,7 @@ const Schedule = () => {
       notes: editForm.notes,
       meetingLink: editForm.meetingLink,
       status: editForm.status,
+      description: editForm.description,
     };
     if (editForm.skillId) payload.skill = editForm.skillId;
     
@@ -233,11 +252,7 @@ const Schedule = () => {
     await loadData();
   };
 
-  const sessionFormats = [
-    { value: "video", label: "Video Call", icon: Video },
-    { value: "inperson", label: "In Person", icon: MapPin },
-    { value: "chat", label: "Chat Only", icon: Users }
-  ];
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -250,15 +265,10 @@ const Schedule = () => {
           <p className="text-muted-foreground">Manage your learning and teaching sessions</p>
         </div>
 
-        <Tabs defaultValue="upcoming" className="space-y-8">
-          <TabsList>
-            <TabsTrigger value="upcoming">Upcoming Sessions</TabsTrigger>
-            <TabsTrigger value="calendar">Calendar View</TabsTrigger>
-            <TabsTrigger value="availability">My Availability</TabsTrigger>
-          </TabsList>
+        <div className="space-y-8">
 
           {/* Upcoming Sessions */}
-          <TabsContent value="upcoming" className="space-y-8">
+          <div className="space-y-8">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-semibold">Your Upcoming Sessions</h2>
               <Button onClick={() => setShowNewSessionForm(!showNewSessionForm)}>
@@ -378,24 +388,12 @@ const Schedule = () => {
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium mb-2 block">Session Format</label>
-                    <div className="grid grid-cols-3 gap-4">
-                      {sessionFormats.map((format) => (
-                        <Card key={format.value} className="cursor-pointer hover:shadow-md transition-shadow">
-                          <CardContent className="p-4 text-center">
-                            <format.icon className="h-6 w-6 mx-auto mb-2 text-primary" />
-                            <p className="text-sm font-medium">{format.label}</p>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
                     <label className="text-sm font-medium mb-2 block">Session Description</label>
                     <Textarea 
                       placeholder="What will you cover in this session? Include any preparation materials or goals..."
                       className="min-h-24"
+                      value={editingId ? editForm.description : form.description}
+                      onChange={(e) => editingId ? setEditForm({ ...editForm, description: e.target.value }) : setForm({ ...form, description: e.target.value })}
                     />
                   </div>
 
@@ -509,186 +507,8 @@ const Schedule = () => {
                 </Card>
               ))}
             </div>
-          </TabsContent>
-
-          {/* Calendar View */}
-          <TabsContent value="calendar" className="space-y-8">
-            <div className="grid lg:grid-cols-4 gap-8">
-              <Card className="lg:col-span-1">
-                <CardHeader>
-                  <CardTitle>Calendar</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Calendar
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={setSelectedDate}
-                    className="rounded-md border"
-                  />
-                </CardContent>
-              </Card>
-
-              <Card className="lg:col-span-3">
-                <CardHeader>
-                  <CardTitle>
-                    {selectedDate 
-                      ? selectedDate.toLocaleDateString('en-US', { 
-                          weekday: 'long', 
-                          year: 'numeric', 
-                          month: 'long', 
-                          day: 'numeric' 
-                        })
-                      : 'Select a date'
-                    }
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {selectedDate ? (
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-1 gap-3">
-                        {sessions
-                          .filter(session => {
-                            const sessionDate = new Date(session.dateISO);
-                            return sessionDate.toDateString() === selectedDate.toDateString();
-                          })
-                          .map((session) => (
-                            <div key={session.id} className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
-                              <div className="flex items-center justify-between mb-2">
-                                <h4 className="font-medium">{session.title}</h4>
-                                <Badge variant={session.type === 'learning' ? 'default' : 'secondary'}>
-                                  {session.type === 'learning' ? 'Learning' : 'Teaching'}
-                                </Badge>
-                              </div>
-                              <p className="text-sm text-muted-foreground">
-                                {session.time} with {session.partner}
-                              </p>
-                              <p className="text-xs text-muted-foreground mt-1">{session.skill}</p>
-                            </div>
-                          ))}
-                        {sessions.filter(session => {
-                          const sessionDate = new Date(session.dateISO);
-                          return sessionDate.toDateString() === selectedDate.toDateString();
-                        }).length === 0 && (
-                          <div className="text-center py-8 text-muted-foreground">
-                            <CalendarIcon className="h-8 w-8 mx-auto mb-2" />
-                            <p>No sessions scheduled for this day</p>
-                          </div>
-                        )}
-                      </div>
-                      <Button className="w-full" onClick={() => {
-                        setForm(prev => ({ ...prev, date: selectedDate.toISOString().split('T')[0] }));
-                        setShowNewSessionForm(true);
-                      }}>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add Session for This Day
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="text-center py-12">
-                      <CalendarIcon className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                      <p className="text-muted-foreground">Select a date to view sessions</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          {/* Availability */}
-          <TabsContent value="availability" className="space-y-8">
-            <div>
-              <h2 className="text-2xl font-semibold mb-6">Set Your Availability</h2>
-              
-              <Card>
-                <CardHeader>
-                  <CardTitle>Weekly Schedule</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
-                    {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => (
-                      <div key={day} className="flex items-center gap-6">
-                        <div className="w-24">
-                          <label className="flex items-center gap-2">
-                            <input type="checkbox" className="rounded" defaultChecked={day !== 'Sunday'} />
-                            <span className="font-medium">{day}</span>
-                          </label>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4 flex-1">
-                          <Select defaultValue="09:00">
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {timeSlots.map((time) => (
-                                <SelectItem key={time} value={time.toLowerCase().replace(/[: ]/g, '')}>
-                                  {time}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <Select defaultValue="17:00">
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {timeSlots.map((time) => (
-                                <SelectItem key={time} value={time.toLowerCase().replace(/[: ]/g, '')}>
-                                  {time}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  <div className="mt-6 pt-6 border-t">
-                    <Button>Save Availability</Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Time Zone Settings */}
-              <Card className="mt-6">
-                <CardHeader>
-                  <CardTitle>Timezone & Preferences</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Timezone</label>
-                    <Select defaultValue="pst">
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="pst">Pacific Standard Time (PST)</SelectItem>
-                        <SelectItem value="est">Eastern Standard Time (EST)</SelectItem>
-                        <SelectItem value="cst">Central Standard Time (CST)</SelectItem>
-                        <SelectItem value="utc">Coordinated Universal Time (UTC)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label className="flex items-center gap-2">
-                      <input type="checkbox" className="rounded" defaultChecked />
-                      <span className="text-sm">Allow weekend sessions</span>
-                    </label>
-                    <label className="flex items-center gap-2">
-                      <input type="checkbox" className="rounded" defaultChecked />
-                      <span className="text-sm">Send reminder notifications</span>
-                    </label>
-                    <label className="flex items-center gap-2">
-                      <input type="checkbox" className="rounded" />
-                      <span className="text-sm">Auto-accept sessions from verified users</span>
-                    </label>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-        </Tabs>
+          </div>
+        </div>
       </main>
     </div>
   );

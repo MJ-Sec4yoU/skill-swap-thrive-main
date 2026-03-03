@@ -41,6 +41,13 @@ const skillSchema = new mongoose.Schema({
     trim: true,
     maxlength: 500
   },
+  portfolio: [{
+    filename: String,
+    originalName: String,
+    path: String,
+    mimetype: String,
+    size: Number
+  }],
   tags: [String]
 }, {
   timestamps: true

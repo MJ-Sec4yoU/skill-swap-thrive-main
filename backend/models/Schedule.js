@@ -34,7 +34,8 @@ const scheduleSchema = new mongoose.Schema({
     default: 'Pending'
   },
   notes: String,
-  meetingLink: String
+  meetingLink: String,
+  description: String
 }, {
   timestamps: true
 });

@@ -331,7 +331,7 @@ const HowItWorks = () => {
                   Get Started Free
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
-                <Button variant="outline" size="lg" onClick={() => navigate('/explore')}>
+                <Button variant="outline" size="lg" onClick={() => navigate('/learn')}>
                   Browse Skills First
                 </Button>
               </div>

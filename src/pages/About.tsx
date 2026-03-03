@@ -48,7 +48,7 @@ const About = () => {
 
   const team = [
     {
-      name: "Alex Chen",
+      name: "Mufiz Topinkatti",
       role: "CEO & Co-Founder",
       bio: "Former Google engineer passionate about democratizing education through technology.",
       avatar: "AC",
@@ -56,7 +56,7 @@ const About = () => {
       twitter: "#"
     },
     {
-      name: "Sarah Rodriguez",
+      name: "Dhanashree chavhan",
       role: "CTO & Co-Founder", 
       bio: "Full-stack developer and AI researcher focused on building intelligent matching systems.",
       avatar: "SR",
@@ -64,7 +64,7 @@ const About = () => {
       twitter: "#"
     },
     {
-      name: "Marcus Johnson",
+      name: "Vidhan Bhoir",
       role: "Head of Community",
       bio: "Community building expert with 8+ years experience in online education platforms.",
       avatar: "MJ",
@@ -72,7 +72,7 @@ const About = () => {
       twitter: "#"
     },
     {
-      name: "Elena Petrov",
+      name: "Harshita Chaubey",
       role: "Head of Product",
       bio: "Product designer and educator passionate about creating intuitive learning experiences.",
       avatar: "EP",
@@ -326,7 +326,7 @@ const About = () => {
                   Get Started Now
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
-                <Button variant="outline" size="lg" onClick={() => navigate('/explore')}>
+                <Button variant="outline" size="lg" onClick={() => navigate('/learn')}>
                   Explore Skills
                 </Button>
               </div>

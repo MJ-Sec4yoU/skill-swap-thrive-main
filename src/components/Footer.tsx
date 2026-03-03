@@ -7,7 +7,7 @@ const Footer = () => {
     {
       title: "Platform",
       links: [
-        { name: "Explore Skills", href: "/explore" },
+        { name: "Learn Skills", href: "/learn" },
         { name: "How It Works", href: "/how-it-works" },
         { name: "Pricing", href: "/pricing" },
         { name: "Success Stories", href: "/testimonials" }

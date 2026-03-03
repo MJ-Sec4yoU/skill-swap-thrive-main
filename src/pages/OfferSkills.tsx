@@ -5,8 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
+
 import { 
   Plus, 
   Upload, 
@@ -17,11 +16,10 @@ import {
   Edit,
   Trash2,
   Eye,
-  TrendingUp,
-  MessageSquare,
+
   Calendar
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { apiService } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
@@ -35,6 +33,7 @@ const OfferSkills = () => {
   const [newSkillLevel, setNewSkillLevel] = useState<string | undefined>(undefined);
   const [newSkillExperience, setNewSkillExperience] = useState("");
   const [newSkillAvailability, setNewSkillAvailability] = useState("");
+  const [portfolioFiles, setPortfolioFiles] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [mySkills, setMySkills] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,6 +43,24 @@ const OfferSkills = () => {
   const { toast } = useToast();
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Handle file upload
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      const newFiles = Array.from(files);
+      setPortfolioFiles(prev => [...prev, ...newFiles]);
+    }
+  };
+
+  const handleRemoveFile = (index: number) => {
+    setPortfolioFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleChooseFiles = () => {
+    fileInputRef.current?.click();
+  };
   
   // Load user's skills
   const loadMySkills = async () => {
@@ -113,6 +130,7 @@ const OfferSkills = () => {
       setNewSkillLevel(undefined);
       setNewSkillExperience("");
       setNewSkillAvailability("");
+      setPortfolioFiles([]);
       setShowAddForm(false);
       await loadMySkills(); // Reload the skills list
     } catch (e) {
@@ -161,6 +179,7 @@ const OfferSkills = () => {
     setNewSkillLevel(skill.level || undefined);
     setNewSkillExperience(skill.yearsExperience ? String(skill.yearsExperience) : "");
     setNewSkillAvailability(skill.availabilityDescription || "");
+    setPortfolioFiles([]); // Reset portfolio files for editing
     setShowAddForm(true);
   };
 
@@ -206,6 +225,7 @@ const OfferSkills = () => {
       setNewSkillLevel(undefined);
       setNewSkillExperience("");
       setNewSkillAvailability("");
+      setPortfolioFiles([]);
       setEditingSkill(null);
       setShowAddForm(false);
       await loadMySkills();
@@ -241,15 +261,10 @@ const OfferSkills = () => {
           <p className="text-muted-foreground">Share your expertise and help others learn while earning teaching credits</p>
         </div>
 
-        <Tabs defaultValue="my-skills" className="space-y-8">
-          <TabsList>
-            <TabsTrigger value="my-skills">My Skills</TabsTrigger>
-            <TabsTrigger value="analytics">Performance</TabsTrigger>
-            <TabsTrigger value="requests">Requests</TabsTrigger>
-          </TabsList>
+        <div className="space-y-8">
 
-          {/* My Skills Tab */}
-          <TabsContent value="my-skills" className="space-y-8">
+          {/* My Skills Section */}
+          <div className="space-y-8">
             {/* Quick Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               <Card>
@@ -363,16 +378,46 @@ const OfferSkills = () => {
                     />
                   </div>
 
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Portfolio/Certifications</label>
-                    <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
-                      <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                      <p className="text-sm text-muted-foreground mb-2">
-                        Upload certificates, portfolio pieces, or work samples
-                      </p>
-                      <Button variant="outline" size="sm">Choose Files</Button>
+                  {!editingSkill && (
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Portfolio/Certifications</label>
+                      <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
+                        <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                        <p className="text-sm text-muted-foreground mb-2">
+                          Upload certificates, portfolio pieces, or work samples
+                        </p>
+                        <Button variant="outline" size="sm" onClick={handleChooseFiles}>Choose Files</Button>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          multiple
+                          accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif"
+                          onChange={handleFileSelect}
+                          className="hidden"
+                        />
+                      </div>
+                      {portfolioFiles.length > 0 && (
+                        <div className="mt-3">
+                          <p className="text-sm font-medium mb-2">Selected Files:</p>
+                          <div className="space-y-2">
+                            {portfolioFiles.map((file, index) => (
+                              <div key={index} className="flex items-center justify-between p-2 bg-muted rounded text-sm">
+                                <span className="truncate">{file.name}</span>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleRemoveFile(index)}
+                                  className="text-red-500 hover:text-red-700"
+                                >
+                                  ✕
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  </div>
+                  )}
 
                   <div>
                     <label className="text-sm font-medium mb-2 block">Availability</label>
@@ -402,6 +447,7 @@ const OfferSkills = () => {
                         setNewSkillLevel(undefined);
                         setNewSkillExperience("");
                         setNewSkillAvailability("");
+                        setPortfolioFiles([]);
                       }}
                     >
                       Cancel
@@ -602,120 +648,8 @@ const OfferSkills = () => {
                 </div>
               </div>
             )}
-          </TabsContent>
-
-          {/* Analytics Tab */}
-          <TabsContent value="analytics" className="space-y-8">
-            <div className="grid md:grid-cols-2 gap-8">
-              {/* Teaching Performance */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5" />
-                    Teaching Performance
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-sm">Student Satisfaction</span>
-                      <span className="text-sm font-medium">96%</span>
-                    </div>
-                    <Progress value={96} className="h-2" />
-                  </div>
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-sm">Session Completion Rate</span>
-                      <span className="text-sm font-medium">89%</span>
-                    </div>
-                    <Progress value={89} className="h-2" />
-                  </div>
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-sm">Response Time</span>
-                      <span className="text-sm font-medium">92%</span>
-                    </div>
-                    <Progress value={92} className="h-2" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Recent Activity */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Recent Teaching Activity</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">Session completed: React Hooks</p>
-                        <p className="text-xs text-muted-foreground">2 hours ago</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">New learning request received</p>
-                        <p className="text-xs text-muted-foreground">5 hours ago</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">5-star rating received</p>
-                        <p className="text-xs text-muted-foreground">1 day ago</p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          {/* Requests Tab */}
-          <TabsContent value="requests" className="space-y-8">
-            <div>
-              <h2 className="text-2xl font-semibold mb-6">Learning Requests</h2>
-              <div className="space-y-4">
-                {[1,2,3].map((request) => (
-                  <Card key={request} className="hover:shadow-lg transition-shadow">
-                    <CardContent className="p-6">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-start gap-4">
-                          <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center text-primary-foreground font-medium">
-                            JD
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="font-semibold mb-1">John Doe</h3>
-                            <p className="text-sm text-muted-foreground mb-2">
-                              Wants to learn <strong>React Development</strong>
-                            </p>
-                            <p className="text-sm mb-3">
-                              "Hi! I'm looking to learn React for building web applications. I have basic JavaScript knowledge and would love to work on a project together."
-                            </p>
-                            <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                              <span>Beginner level</span>
-                              <span>Available weekends</span>
-                              <span>2 hours ago</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button size="sm">Accept</Button>
-                          <Button variant="outline" size="sm">
-                            <MessageSquare className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
+          </div>
+        </div>
       </main>
     </div>
   );

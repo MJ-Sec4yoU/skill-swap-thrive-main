@@ -21,6 +21,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
 import { apiService, buildAssetUrl, API_BASE_URL, ASSET_BASE_URL } from "@/lib/api";
+import { InterestedStudents } from "@/components/InterestedStudents";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -128,8 +130,8 @@ const Dashboard = () => {
           if (profileResult.data) {
             setProfile(profileResult.data);
           } else if (profileResult.error) {
-            setError(profileResult.error);
             console.error('Profile fetch error:', profileResult.error);
+            // Don't set error for profile - continue with other requests
           }
 
           // Fetch schedules for upcoming sessions
@@ -151,15 +153,41 @@ const Dashboard = () => {
             setUpcomingSessions(upcoming);
           } else if (schedulesResult.error) {
             console.error('Schedules fetch error:', schedulesResult.error);
+            // Don't set error - continue with other requests
           }
 
-          // Fetch skills for recommended matches (temporarily disabled due to TypeScript issues)
-          // const skillsResult = await apiService.getSkills();
-          // Set empty recommended matches for now
-          setRecommendedMatches([]);
+          // Fetch matches for recommended matches section
+          try {
+            const matchesResult = await apiService.getMatches({ limit: 3, minScore: 50 });
+            console.log('Matches result:', matchesResult);
+            if (matchesResult.data) {
+              const matchesData = matchesResult.data as any;
+              if (matchesData.matches && Array.isArray(matchesData.matches)) {
+                const formattedMatches = matchesData.matches.slice(0, 3).map((match: any) => ({
+                  id: match._id,
+                  name: match.teacher?.name || 'Unknown Teacher',
+                  avatar: match.teacher?.name ? match.teacher.name.slice(0, 2).toUpperCase() : 'TH',
+                  skill: match.skill?.name || 'Unknown Skill',
+                  rating: match.teacher?.rating?.averageRating?.toFixed(1) || '0.0',
+                  sessions: match.teacher?.rating?.totalRatings || 0,
+                  match: Math.round(match.matchScore),
+                  location: match.teacher?.profile?.location || 'Location not specified'
+                }));
+                setRecommendedMatches(formattedMatches);
+              } else {
+                setRecommendedMatches([]);
+              }
+            } else if (matchesResult.error) {
+              console.error('Matches fetch error:', matchesResult.error);
+              setRecommendedMatches([]);
+            }
+          } catch (matchError) {
+            console.error('Error fetching matches:', matchError);
+            setRecommendedMatches([]);
+          }
         } catch (err) {
           console.error('Dashboard data fetch error:', err);
-          setError('Failed to load dashboard data');
+          setError('Failed to load some dashboard data, but you can still use the dashboard');
         } finally {
           setLoading(false);
         }
@@ -212,15 +240,16 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header isLoggedIn={true} />
-      
-      <main className="container py-8">
-        {/* Welcome Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Welcome back, {profile?.name || user.name}! 👋</h1>
-          <p className="text-muted-foreground">Ready to continue your learning journey?</p>
-        </div>
+    <ErrorBoundary>
+      <div className="min-h-screen bg-background">
+        <Header isLoggedIn={true} />
+        
+        <main className="container py-8">
+          {/* Welcome Header */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-foreground mb-2">Welcome back, {profile?.name || user.name}! 👋</h1>
+            <p className="text-muted-foreground">Ready to continue your learning journey?</p>
+          </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -395,7 +424,7 @@ const Dashboard = () => {
                     </CardTitle>
                     <CardDescription>Your scheduled skill exchange sessions</CardDescription>
                   </div>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={() => navigate('/schedule')}>
                     View All
                   </Button>
                 </div>
@@ -464,6 +493,9 @@ const Dashboard = () => {
               </CardContent>
             </Card>
 
+            {/* Interested Students Section */}
+            <InterestedStudents />
+
           </div>
 
           {/* Sidebar */}
@@ -478,28 +510,40 @@ const Dashboard = () => {
                 <CardDescription>Perfect skill exchange partners for you</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {recommendedMatches.map((match) => (
-                  <div key={match.id} className="flex items-center gap-3 p-3 border border-border rounded-lg hover:shadow-sm transition-shadow">
-                    <div className="w-10 h-10 bg-gradient-primary rounded-full flex items-center justify-center text-primary-foreground text-sm font-medium">
-                      {match.avatar}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">{match.name}</p>
-                      <p className="text-xs text-muted-foreground">{match.skill}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <div className="flex items-center gap-1">
-                          <Star className="w-3 h-3 text-yellow-500 fill-current" />
-                          <span className="text-xs">{match.rating}</span>
-                        </div>
-                        <span className="text-xs text-muted-foreground">• {match.sessions} sessions</span>
+                {recommendedMatches.length > 0 ? (
+                  recommendedMatches.map((match) => (
+                    <div key={match.id} className="flex items-center gap-3 p-3 border border-border rounded-lg hover:shadow-sm transition-shadow cursor-pointer"
+                         onClick={() => navigate('/matches')}>
+                      <div className="w-10 h-10 bg-gradient-primary rounded-full flex items-center justify-center text-primary-foreground text-sm font-medium">
+                        {match.avatar}
                       </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{match.name}</p>
+                        <p className="text-xs text-muted-foreground truncate">{match.skill}</p>
+                        <p className="text-xs text-muted-foreground truncate">{match.location}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <div className="flex items-center gap-1">
+                            <Star className="w-3 h-3 text-yellow-500 fill-current" />
+                            <span className="text-xs">{match.rating}</span>
+                          </div>
+                          <span className="text-xs text-muted-foreground">• {match.sessions} reviews</span>
+                        </div>
+                      </div>
+                      <Badge variant="secondary" className="text-xs">
+                        {match.match}% match
+                      </Badge>
                     </div>
-                    <Badge variant="secondary" className="text-xs">
-                      {match.match}% match
-                    </Badge>
+                  ))
+                ) : (
+                  <div className="text-center py-8">
+                    <Users className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground mb-3">No matches found yet</p>
+                    <Button variant="outline" size="sm" onClick={() => navigate('/matches')}>
+                      Generate Matches
+                    </Button>
                   </div>
-                ))}
-                <Button variant="outline" className="w-full" size="sm" onClick={() => navigate('/schedule')}>
+                )}
+                <Button variant="outline" className="w-full" size="sm" onClick={() => navigate('/matches')}>
                   View All Matches
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
@@ -538,6 +582,7 @@ const Dashboard = () => {
         </div>
       </main>
     </div>
+    </ErrorBoundary>
   );
 };
 

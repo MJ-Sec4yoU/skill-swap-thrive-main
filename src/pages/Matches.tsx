@@ -338,6 +338,13 @@ const Matches = () => {
                         <Badge className={quality.color}>
                           {match.matchScore}%
                         </Badge>
+                        
+                        {/* Status indicator when both parties are interested */}
+                        {match.studentInterested && match.teacherInterested && (
+                          <Badge className="bg-green-100 text-green-700">
+                            Connected!
+                          </Badge>
+                        )}
                       </div>
                     </CardHeader>
                     
@@ -390,23 +397,47 @@ const Matches = () => {
                       {/* Actions */}
                       <div className="flex gap-2 pt-2">
                         {match.studentInterested ? (
-                          <Button variant="outline" disabled className="flex-1">
-                            <Heart className="h-4 w-4 mr-2 text-red-500" />
-                            Interest Expressed
-                          </Button>
+                          <>
+                            <Button variant="outline" disabled className="flex-1">
+                              <Heart className="h-4 w-4 mr-2 text-red-500" />
+                              Interest Expressed
+                            </Button>
+                            
+                            {/* Show message button when both parties are interested or when teacher has accepted */}
+                            {match.teacherInterested ? (
+                              <Button 
+                                onClick={() => navigate('/messages', { 
+                                  state: { 
+                                    recipientId: match.teacher._id,
+                                    recipientName: match.teacher.name 
+                                  } 
+                                })}
+                                className="bg-green-600 hover:bg-green-700"
+                              >
+                                <MessageSquare className="h-4 w-4 mr-2" />
+                                Message Teacher
+                              </Button>
+                            ) : (
+                              <Button variant="outline" size="sm" disabled>
+                                <Clock className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </>
                         ) : (
-                          <Button 
-                            onClick={() => expressInterest(match._id)}
-                            className="flex-1"
-                          >
-                            <Heart className="h-4 w-4 mr-2" />
-                            Express Interest
-                          </Button>
+                          <>
+                            <Button 
+                              onClick={() => expressInterest(match._id)}
+                              className="flex-1"
+                            >
+                              <Heart className="h-4 w-4 mr-2" />
+                              Express Interest
+                            </Button>
+                            
+                            <Button variant="outline" size="sm" disabled>
+                              <MessageSquare className="h-4 w-4" />
+                            </Button>
+                          </>
                         )}
-                        
-                        <Button variant="outline" size="sm">
-                          <MessageSquare className="h-4 w-4" />
-                        </Button>
                       </div>
                     </CardContent>
                   </Card>

@@ -498,6 +498,130 @@ router.post('/students/:matchId/accept', auth, async (req, res) => {
   }
 });
 
+// Direct session request - allows requesting sessions from any teacher without skill matching
+router.post('/request-direct-session', auth, async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { teacherId, skillId, skillName, message } = req.body;
+    
+    // Validate required fields
+    if (!teacherId || !skillId || !skillName) {
+      return res.status(400).json({ 
+        message: 'Teacher ID, skill ID, and skill name are required.',
+        field: 'validation'
+      });
+    }
+    
+    // Check if teacher exists and is not banned
+    const teacher = await User.findById(teacherId);
+    if (!teacher) {
+      return res.status(404).json({ 
+        message: 'The teacher you are trying to contact could not be found.',
+        field: 'teacher'
+      });
+    }
+    
+    if (teacher.profile?.isBanned) {
+      return res.status(403).json({ 
+        message: 'This teacher is currently unavailable.',
+        field: 'teacher'
+      });
+    }
+    
+    // Check if user is trying to request from themselves
+    if (teacherId === userId.toString()) {
+      return res.status(400).json({ 
+        message: 'You cannot request a session from yourself.',
+        field: 'teacher'
+      });
+    }
+    
+    // Get the skill details
+    const skill = await Skill.findById(skillId);
+    if (!skill) {
+      return res.status(404).json({ 
+        message: 'The skill you are trying to learn could not be found.',
+        field: 'skill'
+      });
+    }
+    
+    // Check if a match already exists between these users for this skill
+    let existingMatch = await SkillMatch.findOne({
+      student: userId,
+      teacher: teacherId,
+      skill: skillId,
+      status: { $in: ['Active', 'Contacted'] }
+    });
+    
+    if (existingMatch) {
+      // If match exists, just express interest if not already done
+      if (!existingMatch.studentInterested) {
+        existingMatch.studentInterested = true;
+        existingMatch.lastContactDate = new Date();
+        await existingMatch.save();
+      }
+      
+      return res.json({ 
+        message: 'Session request sent successfully!',
+        match: existingMatch,
+        type: 'existing_match'
+      });
+    }
+    
+    // Create a new match without requiring skill compatibility
+    const user = await User.findById(userId);
+    
+    // Calculate a basic match score (we'll use a default good score since we're bypassing matching logic)
+    const basicMatchData = {
+      score: 75, // Good default score for direct requests
+      factors: {
+        skillMatch: 50,    // Moderate skill match
+        location: 15,      // Default location score
+        rating: 10,        // Default rating score
+        experience: 0      // No experience bonus for direct requests
+      }
+    };
+    
+    // Create the match
+    const newMatch = new SkillMatch({
+      student: userId,
+      teacher: teacherId,
+      skill: skillId,
+      matchScore: basicMatchData.score,
+      factors: basicMatchData.factors,
+      studentInterested: true, // Auto-express interest since this is a direct request
+      status: 'Active',
+      lastContactDate: new Date()
+    });
+    
+    const savedMatch = await newMatch.save();
+    
+    // Populate the match with user and skill details for response
+    const populatedMatch = await SkillMatch.findById(savedMatch._id)
+      .populate({
+        path: 'teacher',
+        select: 'name email profile'
+      })
+      .populate({
+        path: 'skill',
+        select: 'name description category level'
+      });
+    
+    res.json({ 
+      message: 'Session request sent successfully!',
+      match: populatedMatch,
+      type: 'new_match'
+    });
+    
+  } catch (error) {
+    console.error('Direct session request error:', error);
+    res.status(500).json({ 
+      message: 'We encountered an issue while sending your session request. Please try again.',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
 // Advanced matching with filters
 router.post('/advanced-search', auth, async (req, res) => {
   try {

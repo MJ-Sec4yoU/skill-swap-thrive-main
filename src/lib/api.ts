@@ -353,6 +353,19 @@ class ApiService {
     });
   }
 
+  // Direct session request endpoint - allows requesting sessions without skill matching requirements
+  async requestDirectSession(sessionData: {
+    teacherId: string;
+    skillId: string;
+    skillName: string;
+    message?: string;
+  }) {
+    return this.request('/matching/request-direct-session', {
+      method: 'POST',
+      body: JSON.stringify(sessionData),
+    });
+  }
+
   // Ratings endpoints
   async getUserRatings(userId: string, params?: { limit?: number; page?: number }) {
     const queryParams = new URLSearchParams();

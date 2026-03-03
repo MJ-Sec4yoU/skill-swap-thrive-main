@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { Search, Filter, Star, Calendar, MapPin, Grid, List, ArrowRight, Loader2 } from "lucide-react";
+import { Search, Filter, Star, Calendar, MapPin, Grid, List, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { apiService, buildAssetUrl } from "@/lib/api";
@@ -124,67 +124,38 @@ const ExploreSkills = () => {
     }
     
     try {
-      // Set default date/time for the session request (today + 1 week, 2 PM - 3 PM)
-      const defaultDate = new Date();
-      defaultDate.setDate(defaultDate.getDate() + 7);
-      const dateString = defaultDate.toISOString().split('T')[0];
-      
-      // Create a schedule request with proper payload structure
-      const result = await apiService.createSchedule({
-        student: user._id, // Current user is the student
-        teacher: skill.offeredBy._id, // The skill provider is the teacher
-        skill: skill._id,
-        date: dateString,
-        startTime: "14:00", // 2:00 PM
-        endTime: "15:00", // 3:00 PM
-        status: 'Pending',
-        notes: `Learning session request for ${skill.name}`
+      // Create a direct session request without requiring skill matching
+      // This allows any user to request sessions from any teacher regardless of skill compatibility
+      const result = await apiService.requestDirectSession({
+        teacherId: skill.offeredBy._id,
+        skillId: skill._id,
+        skillName: skill.name,
+        message: `Hi! I would like to request a learning session for ${skill.name}. Looking forward to learning from you!`
       });
       
       if (result.data) {
         toast({
-          title: "Session Requested",
-          description: `Your request for ${skill.name} has been sent!`,
+          title: "Session Request Sent",
+          description: `Your session request for ${skill.name} has been sent to ${skill.offeredBy?.name || 'the teacher'}!`,
         });
       } else {
         toast({
           title: "Error",
-          description: result.error || "Failed to request session",
+          description: result.error || "Failed to send session request",
           variant: "destructive"
         });
       }
     } catch (error) {
+      console.error('Request session error:', error);
       toast({
         title: "Error",
-        description: "An error occurred while requesting the session",
+        description: "An error occurred while sending your session request",
         variant: "destructive"
       });
     }
   };
 
-  const handleSendMessage = (skill: any) => {
-    if (!user) {
-      toast({
-        title: "Login Required",
-        description: "Please log in to send messages",
-        variant: "destructive"
-      });
-      navigate('/login');
-      return;
-    }
-    
-    navigate('/messages', { 
-      state: { 
-        recipientId: skill.offeredBy._id,
-        recipientName: skill.offeredBy.name,
-        skillContext: skill.name
-      } 
-    });
-  };
 
-  const handleViewProfile = (skill: any) => {
-    navigate(`/profile/${skill.offeredBy._id}`);
-  };
 
   const handleFilterChange = (key: string, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value }));
@@ -435,21 +406,6 @@ const ExploreSkills = () => {
                               onClick={() => handleRequestSession(skill)}
                             >
                               Request Session
-                            </Button>
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => handleSendMessage(skill)}
-                            >
-                              Message
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => handleViewProfile(skill)}
-                            >
-                              View Profile
-                              <ArrowRight className="ml-1 h-3 w-3" />
                             </Button>
                           </div>
                         </div>
