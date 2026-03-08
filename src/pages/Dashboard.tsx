@@ -241,351 +241,316 @@ const Dashboard = () => {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen" style={{ background: "linear-gradient(135deg, #faf5ff 0%, #eff6ff 50%, #fdf4ff 100%)" }}>
         <Header isLoggedIn={true} />
-        
-        <main className="container py-8">
-          {/* Welcome Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-foreground mb-2">Welcome back, {profile?.name || user.name}! 👋</h1>
-            <p className="text-muted-foreground">Ready to continue your learning journey?</p>
+
+        <main className="container py-8 max-w-7xl mx-auto px-4">
+
+          {/* Welcome Banner */}
+          <div className="rounded-3xl p-8 mb-8 text-white relative overflow-hidden"
+            style={{ background: "linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)" }}>
+            <div className="absolute inset-0 opacity-20" style={{
+              backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)",
+              backgroundSize: "28px 28px"
+            }} />
+            <div className="absolute -top-10 -right-10 w-48 h-48 bg-white/10 rounded-full blur-2xl" />
+            <div className="relative z-10 flex items-center justify-between flex-wrap gap-4">
+              <div>
+                <h1 className="text-3xl font-black mb-1">Welcome back, {profile?.name?.split(' ')[0] || user.name}! 👋</h1>
+                <p className="text-white/70">Ready to continue your learning journey?</p>
+              </div>
+              <button onClick={() => navigate('/profile/edit')}
+                className="px-5 py-2.5 bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 text-white font-semibold rounded-2xl transition-colors flex items-center gap-2">
+                <Settings className="w-4 h-4" /> Edit Profile
+              </button>
+            </div>
           </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {stats.map((stat, index) => (
-            <Card key={index} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
-                    <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+          {/* Stats Cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            {stats.map((stat, index) => {
+              const gradients = [
+                "from-violet-500 to-purple-600",
+                "from-indigo-500 to-blue-600",
+                "from-fuchsia-500 to-pink-600",
+                "from-amber-500 to-orange-500"
+              ];
+              return (
+                <div key={index} className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm hover:shadow-md transition-all">
+                  <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${gradients[index]} flex items-center justify-center mb-3`}>
+                    <stat.icon className="w-5 h-5 text-white" />
                   </div>
-                  <div className={`p-2 rounded-lg bg-muted ${stat.color}`}>
-                    <stat.icon className="h-5 w-5" />
-                  </div>
+                  <p className="text-2xl font-black text-slate-900">{stat.value}{stat.label === "Profile Completion" ? "%" : ""}</p>
+                  <p className="text-sm text-slate-500 mt-0.5">{stat.label}</p>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+              );
+            })}
+          </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Profile Section */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="flex items-center gap-2">
-                      <User className="h-5 w-5" />
-                      My Profile
-                    </CardTitle>
-                    <CardDescription>Manage your profile information and settings</CardDescription>
-                  </div>
-                  <Button variant="outline" size="sm" onClick={() => navigate('/profile/edit')}>
-                    <Settings className="mr-2 h-4 w-4" />
-                    Edit Profile
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="flex items-center gap-6">
-                  <div className="relative">
-                    {profile?.profile?.avatar ? (
-                      <>
-                        {console.log('Avatar path from API:', profile.profile.avatar)}
-                        {console.log('Constructed asset URL:', buildAssetUrl(profile.profile.avatar, true))}
-                        <img
-                          src={buildAssetUrl(profile.profile.avatar, true)}
-                          alt="Avatar"
-                          className="w-20 h-20 rounded-full object-cover"
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            {/* Main Content */}
+            <div className="lg:col-span-2 space-y-6">
+
+              {/* Profile Card */}
+              <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+                <div className="h-2 w-full" style={{ background: "linear-gradient(90deg, #667eea, #764ba2, #f093fb)" }} />
+                <div className="p-6">
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="relative">
+                      {profile?.profile?.avatar ? (
+                        <img src={buildAssetUrl(profile.profile.avatar, true)} alt="Avatar"
+                          className="w-20 h-20 rounded-2xl object-cover"
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
-                            console.log('Avatar load error, trying alternative paths');
-                            // Try different path constructions as fallback
-                            const directUrl = `${ASSET_BASE_URL}/uploads/${profile.profile.avatar}`;
-                            const directUrlNoUploads = `${ASSET_BASE_URL}/${profile.profile.avatar}`;
-                            console.log('Trying direct URL with uploads:', directUrl);
-                            console.log('Trying direct URL without uploads:', directUrlNoUploads);
                             target.onerror = null;
-                            target.src = directUrl;
-                          }}
-                          onLoad={() => console.log('Avatar loaded successfully')}
-                        />
-                      </>
-                    ) : (
-                      <div className="w-20 h-20 bg-gradient-primary rounded-full flex items-center justify-center text-primary-foreground text-2xl font-bold">
-                        {profile?.name ? profile.name.charAt(0).toUpperCase() + profile.name.charAt(1).toUpperCase() : 'JD'}
-                      </div>
-                    )}
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      className="absolute -bottom-2 -right-2 rounded-full w-8 h-8 p-0"
-                      onClick={() => navigate('/profile/edit')}
-                    >
-                      <Camera className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-xl font-semibold">{profile?.name || user.name}</h3>
-                    <p className="text-muted-foreground">{profile?.email || user.email}</p>
-                    <div className="flex items-center gap-4 mt-2">
-                      <Badge variant="secondary">{getSkillCount(profile?.skillsTeaching)} Skills Teaching</Badge>
-                      <Badge variant="secondary">{getSkillCount(profile?.skillsLearning)} Skills Learning</Badge>
-                    </div>
-                    {/* Quick preview of actual skills */}
-                    <div className="flex flex-wrap gap-1 mt-3">
-                      {profile?.skillsTeaching?.slice(0, 3).map((skillObj: any, index: number) => {
-                        const skillName = typeof skillObj === 'string' ? skillObj : skillObj?.skill || 'Unknown Skill';
-                        return (
-                          <Badge key={index} variant="outline" className="text-xs">{skillName}</Badge>
-                        );
-                      })}
-                      {profile?.skillsTeaching?.length > 3 && (
-                        <Badge variant="outline" className="text-xs">+{profile.skillsTeaching.length - 3} more</Badge>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <h4 className="font-medium mb-2">Bio</h4>
-                    <p className="text-sm text-muted-foreground">
-                      {profile?.profile?.bio || 'No bio available.'}
-                    </p>
-                  </div>
-                  <div>
-                    <h4 className="font-medium mb-2">Skills I'm Teaching</h4>
-                    <div className="flex flex-wrap gap-1 max-w-full overflow-auto">
-                      {profile?.skillsTeaching && profile.skillsTeaching.length > 0 ? (
-                        profile.skillsTeaching.map((skillObj: any, index: number) => {
-                          // Handle both old format (strings) and new format (objects)
-                          const skillName = typeof skillObj === 'string' ? skillObj : skillObj?.skill || 'Unknown Skill';
-                          return (
-                            <Badge key={index} variant="outline">{skillName}</Badge>
-                          );
-                        })
+                            target.src = `${ASSET_BASE_URL}/uploads/${profile.profile.avatar}`;
+                          }} />
                       ) : (
-                        <p className="text-sm text-muted-foreground">No teaching skills added yet. <button className="text-primary underline" onClick={() => navigate('/profile/edit')}>Add some skills</button></p>
+                        <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-white text-2xl font-black"
+                          style={{ background: "linear-gradient(135deg, #667eea, #764ba2)" }}>
+                          {profile?.name ? profile.name.charAt(0).toUpperCase() + (profile.name.charAt(1) || '').toUpperCase() : 'JD'}
+                        </div>
                       )}
+                      <button onClick={() => navigate('/profile/edit')}
+                        className="absolute -bottom-2 -right-2 w-8 h-8 bg-white border border-slate-200 rounded-xl flex items-center justify-center shadow-sm hover:bg-slate-50">
+                        <Camera className="w-3.5 h-3.5 text-slate-600" />
+                      </button>
                     </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <h4 className="font-medium mb-2">Skills I'm Learning</h4>
-                    <div className="flex flex-wrap gap-1">
-                      {profile?.skillsLearning && profile.skillsLearning.length > 0 ? (
-                        profile.skillsLearning.map((skillObj: any, index: number) => {
-                          // Handle both old format (strings) and new format (objects)
-                          const skillName = typeof skillObj === 'string' ? skillObj : skillObj?.skill || 'Unknown Skill';
-                          return (
-                            <Badge key={index} variant="outline">{skillName}</Badge>
-                          );
-                        })
-                      ) : (
-                        <p className="text-sm text-muted-foreground">No learning skills added yet. <button className="text-primary underline" onClick={() => navigate('/profile/edit')}>Add some skills</button></p>
-                      )}
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className="font-medium mb-2">Quick Stats</h4>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>Profile Completion</span>
-                        <span>{(typeof profile?.profile?.profileCompletion === 'number' && profile?.profile?.profileCompletion > 0
-                          ? profile?.profile?.profileCompletion
-                          : computeCompletion(profile))}%</span>
+                    <div className="flex-1">
+                      <h3 className="text-xl font-black text-slate-900">{profile?.name || user.name}</h3>
+                      <p className="text-slate-500 text-sm">{profile?.email || user.email}</p>
+                      <div className="flex gap-2 mt-2 flex-wrap">
+                        <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-violet-100 text-violet-700">
+                          {getSkillCount(profile?.skillsTeaching)} Teaching
+                        </span>
+                        <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700">
+                          {getSkillCount(profile?.skillsLearning)} Learning
+                        </span>
+                        {profile?.skillsTeaching?.slice(0, 2).map((skillObj: any, i: number) => (
+                          <span key={i} className="px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600">
+                            {typeof skillObj === 'string' ? skillObj : skillObj?.skill}
+                          </span>
+                        ))}
                       </div>
-                      <Progress value={(typeof profile?.profile?.profileCompletion === 'number' && profile?.profile?.profileCompletion > 0
-                        ? profile?.profile?.profileCompletion
-                        : computeCompletion(profile))} className="h-2" />
-                      <p className="text-xs text-muted-foreground">
-                        Complete your profile to get better matches
-                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-slate-50 rounded-2xl p-4">
+                      <h4 className="font-bold text-slate-700 text-sm mb-2">Bio</h4>
+                      <p className="text-sm text-slate-500">{profile?.profile?.bio || 'No bio added yet.'}</p>
+                    </div>
+                    <div className="bg-slate-50 rounded-2xl p-4">
+                      <h4 className="font-bold text-slate-700 text-sm mb-2">Skills Teaching</h4>
+                      <div className="flex flex-wrap gap-1">
+                        {profile?.skillsTeaching?.length > 0 ? profile.skillsTeaching.map((s: any, i: number) => (
+                          <span key={i} className="px-2 py-0.5 bg-violet-100 text-violet-700 rounded-lg text-xs font-medium">
+                            {typeof s === 'string' ? s : s?.skill}
+                          </span>
+                        )) : <p className="text-xs text-slate-400">None added yet</p>}
+                      </div>
+                    </div>
+                    <div className="bg-slate-50 rounded-2xl p-4">
+                      <h4 className="font-bold text-slate-700 text-sm mb-2">Skills Learning</h4>
+                      <div className="flex flex-wrap gap-1">
+                        {profile?.skillsLearning?.length > 0 ? profile.skillsLearning.map((s: any, i: number) => (
+                          <span key={i} className="px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-lg text-xs font-medium">
+                            {typeof s === 'string' ? s : s?.skill}
+                          </span>
+                        )) : <p className="text-xs text-slate-400">None added yet</p>}
+                      </div>
+                    </div>
+                    <div className="bg-slate-50 rounded-2xl p-4">
+                      <h4 className="font-bold text-slate-700 text-sm mb-2">Profile Completion</h4>
+                      <div className="flex justify-between text-xs text-slate-500 mb-1.5">
+                        <span>Progress</span>
+                        <span className="font-bold text-violet-600">
+                          {typeof profile?.profile?.profileCompletion === 'number' && profile?.profile?.profileCompletion > 0
+                            ? profile?.profile?.profileCompletion : computeCompletion(profile)}%
+                        </span>
+                      </div>
+                      <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                        <div className="h-full rounded-full transition-all" style={{
+                          width: `${typeof profile?.profile?.profileCompletion === 'number' && profile?.profile?.profileCompletion > 0
+                            ? profile?.profile?.profileCompletion : computeCompletion(profile)}%`,
+                          background: "linear-gradient(90deg, #667eea, #764ba2)"
+                        }} />
+                      </div>
+                      <p className="text-xs text-slate-400 mt-1">Complete profile for better matches</p>
                     </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-            {/* Upcoming Sessions */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="flex items-center gap-2">
-                      <Calendar className="h-5 w-5" />
-                      Upcoming Sessions
-                    </CardTitle>
-                    <CardDescription>Your scheduled skill exchange sessions</CardDescription>
+              </div>
+
+              {/* Upcoming Sessions */}
+              <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
+                <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-violet-100 flex items-center justify-center">
+                      <Calendar className="w-5 h-5 text-violet-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-black text-slate-900">Upcoming Sessions</h3>
+                      <p className="text-xs text-slate-500">Your scheduled exchanges</p>
+                    </div>
                   </div>
-                  <Button variant="outline" size="sm" onClick={() => navigate('/schedule')}>
-                    View All
-                  </Button>
+                  <button onClick={() => navigate('/schedule')}
+                    className="text-sm font-semibold text-violet-600 hover:text-violet-700 flex items-center gap-1">
+                    View All <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {upcomingSessions.map((session) => (
-                  <div key={session.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
-                    <div className="flex items-center gap-4">
-                      <div className={`w-2 h-2 rounded-full ${session.type === 'learning' ? 'bg-blue-500' : 'bg-green-500'}`} />
+                {upcomingSessions.length > 0 ? upcomingSessions.map((session) => (
+                  <div key={session.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-3 h-3 rounded-full ${session.type === 'learning' ? 'bg-violet-500' : 'bg-emerald-500'}`} />
                       <div>
-                        <p className="font-medium">{session.title}</p>
-                        <p className="text-sm text-muted-foreground">with {session.partner} • {session.status}</p>
+                        <p className="font-semibold text-slate-900 text-sm">{session.title}</p>
+                        <p className="text-xs text-slate-500">with {session.partner} • {session.status}</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-medium">{session.time}</p>
-                      <Badge variant={session.type === 'learning' ? 'default' : 'secondary'}>
+                      <p className="text-xs font-medium text-slate-700">{session.time}</p>
+                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${session.type === 'learning' ? 'bg-violet-100 text-violet-700' : 'bg-emerald-100 text-emerald-700'}`}>
                         {session.type === 'learning' ? 'Learning' : 'Teaching'}
-                      </Badge>
+                      </span>
                     </div>
                   </div>
-                ))}
-              </CardContent>
-            </Card>
+                )) : (
+                  <div className="text-center py-8 text-slate-400">
+                    <Calendar className="w-10 h-10 mx-auto mb-2 opacity-40" />
+                    <p className="text-sm">No upcoming sessions yet</p>
+                  </div>
+                )}
+              </div>
 
-            {/* Progress Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5" />
-                  Learning Progress
-                </CardTitle>
-                <CardDescription>Track your skill development journey</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {getLearningProgress().length > 0 ? (
-                  getLearningProgress().map((skill, index) => (
-                    <div key={index}>
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm font-medium">{skill.name}</span>
-                        <div className="flex items-center gap-2">
-                          <Badge 
-                            variant={skill.urgency === 'High' ? 'destructive' : skill.urgency === 'Medium' ? 'default' : 'secondary'}
-                            className="text-xs"
-                          >
-                            {skill.urgency}
-                          </Badge>
-                          <span className="text-sm text-muted-foreground">{skill.progress}%</span>
-                        </div>
+              {/* Learning Progress */}
+              <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-9 h-9 rounded-xl bg-indigo-100 flex items-center justify-center">
+                    <TrendingUp className="w-5 h-5 text-indigo-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-slate-900">Learning Progress</h3>
+                    <p className="text-xs text-slate-500">Track your skill development</p>
+                  </div>
+                </div>
+                {getLearningProgress().length > 0 ? getLearningProgress().map((skill, index) => (
+                  <div key={index} className="mb-5 last:mb-0">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="font-semibold text-slate-800 text-sm">{skill.name}</span>
+                      <div className="flex items-center gap-2">
+                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${skill.urgency === 'High' ? 'bg-rose-100 text-rose-600' : skill.urgency === 'Medium' ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-600'}`}>
+                          {skill.urgency}
+                        </span>
+                        <span className="text-sm font-black text-violet-600">{skill.progress}%</span>
                       </div>
-                      <div className="flex justify-between mb-1">
-                        <span className="text-xs text-muted-foreground">Current: {skill.currentLevel}</span>
-                        <span className="text-xs text-muted-foreground">Target: {skill.targetLevel}</span>
-                      </div>
-                      <Progress value={skill.progress} className="h-2" />
                     </div>
-                  ))
-                ) : (
+                    <div className="flex justify-between text-xs text-slate-400 mb-1.5">
+                      <span>Current: {skill.currentLevel}</span>
+                      <span>Target: {skill.targetLevel}</span>
+                    </div>
+                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="h-full rounded-full transition-all" style={{
+                        width: `${skill.progress}%`,
+                        background: "linear-gradient(90deg, #667eea, #f093fb)"
+                      }} />
+                    </div>
+                  </div>
+                )) : (
                   <div className="text-center py-8">
-                    <p className="text-muted-foreground mb-4">No learning skills added yet.</p>
-                    <Button variant="outline" onClick={() => navigate('/profile/edit')}>
+                    <p className="text-slate-400 text-sm mb-3">No learning skills added yet.</p>
+                    <button onClick={() => navigate('/profile/edit')}
+                      className="px-4 py-2 border border-slate-200 text-slate-600 rounded-xl text-sm font-medium hover:bg-slate-50">
                       Add Learning Skills
-                    </Button>
+                    </button>
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
 
-            {/* Interested Students Section */}
-            <InterestedStudents />
+              {/* Interested Students */}
+              <InterestedStudents />
+            </div>
 
-          </div>
+            {/* Sidebar */}
+            <div className="space-y-6">
 
-          {/* Sidebar */}
-          <div className="space-y-8">
-            {/* Recommended Matches */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  Recommended Matches
-                </CardTitle>
-                <CardDescription>Perfect skill exchange partners for you</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {recommendedMatches.length > 0 ? (
-                  recommendedMatches.map((match) => (
-                    <div key={match.id} className="flex items-center gap-3 p-3 border border-border rounded-lg hover:shadow-sm transition-shadow cursor-pointer"
-                         onClick={() => navigate('/matches')}>
-                      <div className="w-10 h-10 bg-gradient-primary rounded-full flex items-center justify-center text-primary-foreground text-sm font-medium">
-                        {match.avatar}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm truncate">{match.name}</p>
-                        <p className="text-xs text-muted-foreground truncate">{match.skill}</p>
-                        <p className="text-xs text-muted-foreground truncate">{match.location}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <div className="flex items-center gap-1">
-                            <Star className="w-3 h-3 text-yellow-500 fill-current" />
-                            <span className="text-xs">{match.rating}</span>
-                          </div>
-                          <span className="text-xs text-muted-foreground">• {match.sessions} reviews</span>
-                        </div>
-                      </div>
-                      <Badge variant="secondary" className="text-xs">
-                        {match.match}% match
-                      </Badge>
+              {/* Recommended Matches */}
+              <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-9 h-9 rounded-xl bg-fuchsia-100 flex items-center justify-center">
+                    <Users className="w-5 h-5 text-fuchsia-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-slate-900">Recommended Matches</h3>
+                    <p className="text-xs text-slate-500">Perfect partners for you</p>
+                  </div>
+                </div>
+                {recommendedMatches.length > 0 ? recommendedMatches.map((match) => (
+                  <div key={match.id}
+                    className="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 cursor-pointer transition-colors mb-2"
+                    onClick={() => navigate('/matches')}>
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
+                      style={{ background: "linear-gradient(135deg, #667eea, #764ba2)" }}>
+                      {match.avatar}
                     </div>
-                  ))
-                ) : (
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm text-slate-900 truncate">{match.name}</p>
+                      <p className="text-xs text-slate-500 truncate">{match.skill}</p>
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
+                        <span className="text-xs text-slate-600">{match.rating}</span>
+                        <span className="text-xs text-slate-400">• {match.sessions} reviews</span>
+                      </div>
+                    </div>
+                    <span className="text-xs font-bold px-2 py-1 bg-violet-100 text-violet-700 rounded-xl flex-shrink-0">
+                      {match.match}%
+                    </span>
+                  </div>
+                )) : (
                   <div className="text-center py-8">
-                    <Users className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground mb-3">No matches found yet</p>
-                    <Button variant="outline" size="sm" onClick={() => navigate('/matches')}>
+                    <Users className="w-10 h-10 mx-auto mb-2 text-slate-300" />
+                    <p className="text-sm text-slate-400 mb-3">No matches yet</p>
+                    <button onClick={() => navigate('/matches')}
+                      className="px-4 py-2 border border-slate-200 text-slate-600 rounded-xl text-sm font-medium hover:bg-slate-50">
                       Generate Matches
-                    </Button>
+                    </button>
                   </div>
                 )}
-                <Button variant="outline" className="w-full" size="sm" onClick={() => navigate('/matches')}>
-                  View All Matches
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </CardContent>
-            </Card>
+                <button onClick={() => navigate('/matches')}
+                  className="w-full mt-3 py-2.5 border border-slate-200 text-slate-700 rounded-2xl text-sm font-semibold hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
+                  View All Matches <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
 
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button className="w-full justify-start" variant="outline" onClick={() => navigate('/learn')}>
-                  <BookOpen className="mr-2 h-4 w-4" />
-                  Find Skills to Learn
-                </Button>
-                <Button className="w-full justify-start" variant="outline" onClick={() => navigate('/teach')}>
-                  <Users className="mr-2 h-4 w-4" />
-                  Offer Your Skills
-                </Button>
-                <Button className="w-full justify-start" variant="outline" onClick={() => navigate('/messages')}>
-                  <MessageSquare className="mr-2 h-4 w-4" />
-                  Messages
-                </Button>
-                <Button className="w-full justify-start" variant="outline" onClick={() => navigate('/schedule')}>
-                  <Calendar className="mr-2 h-4 w-4" />
-                  Schedule Session
-                </Button>
-                <Button className="w-full justify-start" variant="outline" onClick={() => navigate('/interested-students')}>
-                  <Users className="mr-2 h-4 w-4" />
-                  View Interested Students
-                </Button>
-                <Button className="w-full justify-start" variant="outline" onClick={() => navigate(`/reviews/${user._id}`)}>
-                <Star className="mr-2 h-4 w-4" />
-                My Reviews
-                </Button>
-              </CardContent>
-            </Card>
+              {/* Quick Actions */}
+              <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
+                <h3 className="font-black text-slate-900 mb-4">Quick Actions</h3>
+                <div className="space-y-2">
+                  {[
+                    { icon: BookOpen, label: "Find Skills to Learn", path: "/learn", color: "bg-violet-100 text-violet-600" },
+                    { icon: Users, label: "Offer Your Skills", path: "/teach", color: "bg-indigo-100 text-indigo-600" },
+                    { icon: MessageSquare, label: "Messages", path: "/messages", color: "bg-fuchsia-100 text-fuchsia-600" },
+                    { icon: Calendar, label: "Schedule Session", path: "/schedule", color: "bg-amber-100 text-amber-600" },
+                    { icon: Users, label: "Interested Students", path: "/interested-students", color: "bg-emerald-100 text-emerald-600" },
+                    { icon: Star, label: "My Reviews", path: `/reviews/${user._id}`, color: "bg-rose-100 text-rose-600" },
+                  ].map((action, i) => (
+                    <button key={i} onClick={() => navigate(action.path)}
+                      className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 transition-colors text-left">
+                      <div className={`w-8 h-8 rounded-xl ${action.color} flex items-center justify-center flex-shrink-0`}>
+                        <action.icon className="w-4 h-4" />
+                      </div>
+                      <span className="text-sm font-semibold text-slate-700">{action.label}</span>
+                      <ArrowRight className="w-3.5 h-3.5 text-slate-400 ml-auto" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+            </div>
           </div>
-        </div>
-      </main>
-    </div>
+        </main>
+      </div>
     </ErrorBoundary>
   );
 };
