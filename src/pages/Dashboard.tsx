@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Crown } from "lucide-react";
 import {
   Calendar,
   MessageSquare,
@@ -439,11 +440,63 @@ const Dashboard = () => {
         <p className="text-xs text-slate-500">View detailed skills visualization</p>
       </div>
     </div>
-    <button onClick={() => navigate('/skills-visualization')}
-      className="px-5 py-2.5 text-white font-semibold rounded-2xl flex items-center gap-2"
-      style={{ background: "linear-gradient(135deg, #667eea, #764ba2)" }}>
-      <TrendingUp className="w-4 h-4" /> View Analytics
-    </button>
+  </div>
+
+  {/* Bar Chart - Teaching vs Learning */}
+  <div className="mb-6">
+    <h4 className="text-sm font-bold text-slate-700 mb-3">Teaching vs Learning Skills</h4>
+    <ResponsiveContainer width="100%" height={200}>
+      <BarChart data={[
+        { name: 'Teaching', count: getSkillCount(profile?.skillsTeaching) },
+        { name: 'Learning', count: getSkillCount(profile?.skillsLearning) },
+        { name: 'Sessions', count: upcomingSessions.length },
+      ]}>
+        <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+        <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
+        <Tooltip />
+        <Bar dataKey="count" radius={[6, 6, 0, 0]}>
+          <Cell fill="#667eea" />
+          <Cell fill="#f093fb" />
+          <Cell fill="#764ba2" />
+        </Bar>
+      </BarChart>
+    </ResponsiveContainer>
+  </div>
+
+  {/* Pie Chart - Skill Categories */}
+  <div>
+    <h4 className="text-sm font-bold text-slate-700 mb-3">Skills Breakdown</h4>
+    {profile?.skillsTeaching?.length > 0 || profile?.skillsLearning?.length > 0 ? (
+      <ResponsiveContainer width="100%" height={220}>
+        <PieChart>
+          <Pie
+            data={[
+              { name: 'Teaching', value: getSkillCount(profile?.skillsTeaching) || 1 },
+              { name: 'Learning', value: getSkillCount(profile?.skillsLearning) || 1 },
+            ]}
+            cx="50%"
+            cy="50%"
+            innerRadius={55}
+            outerRadius={85}
+            paddingAngle={5}
+            dataKey="value"
+          >
+            <Cell fill="#667eea" />
+            <Cell fill="#f093fb" />
+          </Pie>
+          <Tooltip />
+          <Legend />
+        </PieChart>
+      </ResponsiveContainer>
+    ) : (
+      <div className="text-center py-8">
+        <p className="text-slate-400 text-sm mb-3">Add skills to see your breakdown!</p>
+        <button onClick={() => navigate('/profile/edit')}
+          className="px-4 py-2 border border-slate-200 text-slate-600 rounded-xl text-sm font-medium hover:bg-slate-50">
+          Add Skills
+        </button>
+      </div>
+    )}
   </div>
 </div>
   
@@ -516,6 +569,9 @@ const Dashboard = () => {
                     { icon: Calendar, label: "Schedule Session", path: "/schedule", color: "bg-amber-100 text-amber-600" },
                     { icon: Users, label: "Interested Students", path: "/interested-students", color: "bg-emerald-100 text-emerald-600" },
                     { icon: Star, label: "My Reviews", path: `/reviews/${user._id}`, color: "bg-rose-100 text-rose-600" },
+                    { icon: BookOpen, label: "My Skills", path: "/my-skills", color: "bg-teal-100 text-teal-600" },
+                    { icon: Crown, label: "Subscription", path: "/subscription", color: "bg-amber-100 text-amber-600" },
+
                   ].map((action, i) => (
                     <button key={i} onClick={() => navigate(action.path)}
                       className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 transition-colors text-left">

@@ -7,8 +7,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
 const ReviewsPage = lazy(() => import("./pages/Reviews"));
-
-
+const MySkills = lazy(() => import("./pages/MySkills"));
+const Subscription = lazy(() => import("./pages/Subscription"));
 // Lazy load page components
 const Index = lazy(() => import("./pages/Index"));
 const Login = lazy(() => import("./pages/Login"));
@@ -63,7 +63,6 @@ const App = () => (
           <Route path="/interested-students" element={<ProtectedRoute><InterestedStudents /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute><AdminRoute><AdminDashboard /></AdminRoute></ProtectedRoute>} />
           <Route path="/reviews/:userId" element={<ReviewsPage />} />
-          <Route path="/skills-visualization" element={<ProtectedRoute><SkillsVisualization /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

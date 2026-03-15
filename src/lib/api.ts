@@ -415,6 +415,23 @@ class ApiService {
     });
   }
 
+      async getMyPlan() {
+  return this.request('/subscription/my-plan');
+}
+async upgradePlan(plan: string) {
+  return this.request('/subscription/upgrade', {
+    method: 'POST',
+    body: JSON.stringify({ plan }),
+  });
+}
+async cancelPlan() {
+  return this.request('/subscription/cancel', {
+    method: 'POST',
+    body: JSON.stringify({}),
+  });
+}
+
+
   // Admin endpoints
   async adminListUsers() {
     return this.request('/admin/users');
@@ -469,5 +486,6 @@ class ApiService {
     return this.request('/admin/stats');
   }
 }
+
 
 export const apiService = new ApiService();

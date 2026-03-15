@@ -158,6 +158,23 @@ const userSchema = new mongoose.Schema({
       skillMatches: { type: Boolean, default: false }
     }
   },
+  subscription: {
+  plan: {
+    type: String,
+    enum: ['free', 'pro', 'premium'],
+    default: 'free'
+  },
+  startedAt: {
+    type: Date
+  },
+  expiresAt: {
+    type: Date
+  },
+  isActive: {
+    type: Boolean,
+    default: false
+  }
+},
   isAdmin: {
     type: Boolean,
     default: false
@@ -193,6 +210,7 @@ const userSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
+
 
 // Indexes for efficient querying (email index is automatic due to unique: true)
 // userSchema.index({ email: 1 }); // Removed - duplicate of unique: true

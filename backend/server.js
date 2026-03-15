@@ -231,6 +231,7 @@ const adminRoutes = require('./routes/admin');
 const matchingRoutes = require('./routes/matching');
 const ratingRoutes = require('./routes/ratings');
 const reviewsRouter = require('./routes/reviews');
+const subscriptionRoutes = require('./routes/subscription');
 
 // User-specific rate limiting for authentication
 const userRateLimit = createUserRateLimit();
@@ -258,6 +259,8 @@ app.use('/api/schedules', scheduleRoutes);
 app.use('/api/matching', rateLimiters.search, matchingRoutes);
 app.use('/api/ratings', ratingRoutes);
 app.use('/api/reviews', reviewsRouter); 
+app.use('/api/subscription', subscriptionRoutes);
+
 app.use('/api/admin', rateLimiters.admin, adminRoutes);
 
 // Security error handling middleware
