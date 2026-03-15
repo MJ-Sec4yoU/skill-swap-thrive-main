@@ -1,15 +1,55 @@
 import Header from "@/components/Header";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { apiService } from "@/lib/api";
 import { Award, ArrowLeft, Download, Calendar, Star } from "lucide-react";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+
+const CertificateCard = ({ userName, skillName, date, isPreview = false }: {
+  userName: string;
+  skillName: string;
+  date: string;
+  isPreview?: boolean;
+}) => (
+  <div className="certificate-card bg-white rounded-3xl overflow-hidden shadow-lg"
+    style={{ border: "8px double #764ba2" }}>
+    <div className="h-3" style={{ background: "linear-gradient(90deg, #667eea, #764ba2, #f093fb)" }} />
+    <div className="p-8 text-center">
+      <div className="text-4xl mb-2">🎓</div>
+      <p className="text-lg font-bold text-violet-600 mb-1">SwapLearnThrive</p>
+      <h2 className="text-2xl font-black text-slate-800 mb-4"
+        style={{ fontFamily: "Georgia, serif", fontStyle: "italic" }}>
+        Certificate of Completion
+      </h2>
+      <p className="text-slate-500 mb-2">This is to certify that</p>
+      <h3 className="text-3xl font-black text-slate-900 mb-2"
+        style={{ borderBottom: "2px solid #764ba2", paddingBottom: "8px", display: "inline-block" }}>
+        {userName}
+      </h3>
+      <p className="text-slate-500 mt-3 mb-2">has successfully completed</p>
+      <h4 className="text-2xl font-black text-violet-600 mb-4">{skillName}</h4>
+      <div className="text-4xl mb-4">🏆</div>
+      <p className="text-slate-400 text-sm">Completed on: {date}</p>
+      {isPreview && (
+        <div className="mt-4 px-4 py-2 bg-violet-100 rounded-xl">
+          <p className="text-violet-600 text-sm font-semibold">
+            🌟 Complete a session to earn this certificate!
+          </p>
+        </div>
+      )}
+    </div>
+    <div className="h-3" style={{ background: "linear-gradient(90deg, #667eea, #764ba2, #f093fb)" }} />
+  </div>
+);
 
 const Certificates = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [sessions, setSessions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const certificateRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -23,49 +63,21 @@ const Certificates = () => {
     fetchData();
   }, []);
 
-  const handleDownload = (session: any) => {
-    const skillName = typeof session.skill === 'object' ? session.skill.name : session.skill;
-    const date = new Date(session.date).toLocaleDateString();
-    const userName = user?.name || 'User';
+  const handleDownloadPDF = async (index: number, skillName: string) => {
+    const element = certificateRefs.current[index];
+    if (!element) return;
 
-    const content = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <style>
-          body { font-family: Georgia, serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background: #f8f0ff; }
-          .certificate { background: white; width: 800px; padding: 60px; text-align: center; border: 8px double #764ba2; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); }
-          .logo { font-size: 24px; font-weight: bold; color: #667eea; margin-bottom: 20px; }
-          .title { font-size: 48px; color: #764ba2; margin: 20px 0; font-style: italic; }
-          .subtitle { font-size: 18px; color: #666; margin-bottom: 30px; }
-          .name { font-size: 36px; color: #333; font-weight: bold; border-bottom: 2px solid #764ba2; padding-bottom: 10px; margin: 20px auto; width: fit-content; }
-          .skill { font-size: 28px; color: #667eea; font-weight: bold; margin: 20px 0; }
-          .date { font-size: 16px; color: #888; margin-top: 30px; }
-          .stamp { font-size: 60px; margin: 20px 0; }
-        </style>
-      </head>
-      <body>
-        <div class="certificate">
-          <div class="logo">🎓 SwapLearnThrive</div>
-          <div class="title">Certificate of Completion</div>
-          <div class="subtitle">This is to certify that</div>
-          <div class="name">${userName}</div>
-          <div class="subtitle">has successfully completed the skill</div>
-          <div class="skill">${skillName}</div>
-          <div class="stamp">🏆</div>
-          <div class="date">Completed on: ${date}</div>
-        </div>
-      </body>
-      </html>
-    `;
-
-    const blob = new Blob([content], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `certificate-${skillName}-${date}.html`;
-    a.click();
-    URL.revokeObjectURL(url);
+    try {
+      const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('landscape', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      pdf.addImage(imgData, 'PNG', 0, (pdf.internal.pageSize.getHeight() - pdfHeight) / 2, pdfWidth, pdfHeight);
+      pdf.save(`certificate-${skillName}.pdf`);
+    } catch (error) {
+      console.error('PDF generation error:', error);
+    }
   };
 
   if (loading) return (
@@ -105,57 +117,48 @@ const Certificates = () => {
           </div>
         </div>
 
-        {/* Certificates Grid */}
         {sessions.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {sessions.map((session, i) => {
               const skillName = typeof session.skill === 'object' ? session.skill.name : session.skill;
-              const partner = session.teacher?._id === user?._id ? session.student?.name : session.teacher?.name;
               return (
-                <div key={i} className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden hover:shadow-md transition-all">
-                  <div className="h-3" style={{ background: "linear-gradient(90deg, #667eea, #764ba2, #f093fb)" }} />
-                  <div className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl"
-                        style={{ background: "linear-gradient(135deg, #faf5ff, #eff6ff)" }}>
-                        🎓
-                      </div>
-                      <span className="px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">
-                        ✅ Completed
-                      </span>
-                    </div>
-                    <h3 className="text-xl font-black text-slate-900 mb-1">{skillName}</h3>
-                    <p className="text-sm text-slate-500 mb-4">with {partner || 'Partner'}</p>
-                    <div className="flex items-center gap-4 text-xs text-slate-400 mb-5">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="w-3.5 h-3.5" />
-                        {new Date(session.date).toLocaleDateString()}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Star className="w-3.5 h-3.5" />
-                        SwapLearnThrive
-                      </span>
-                    </div>
-                    <button onClick={() => handleDownload(session)}
-                      className="w-full py-2.5 text-white font-semibold rounded-2xl flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
-                      style={{ background: "linear-gradient(135deg, #667eea, #764ba2)" }}>
-                      <Download className="w-4 h-4" /> Download Certificate
-                    </button>
+                <div key={i}>
+                  <div ref={el => certificateRefs.current[i] = el}>
+                    <CertificateCard
+                      userName={user?.name || 'User'}
+                      skillName={skillName}
+                      date={new Date(session.date).toLocaleDateString()}
+                    />
                   </div>
+                  <button
+                    onClick={() => handleDownloadPDF(i, skillName)}
+                    className="w-full mt-4 py-3 text-white font-semibold rounded-2xl flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
+                    style={{ background: "linear-gradient(135deg, #667eea, #764ba2)" }}>
+                    <Download className="w-4 h-4" /> Download PDF Certificate
+                  </button>
                 </div>
               );
             })}
           </div>
         ) : (
-          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-12 text-center">
-            <div className="text-6xl mb-4">🎓</div>
-            <h3 className="text-xl font-black text-slate-900 mb-2">No Certificates Yet!</h3>
-            <p className="text-slate-500 mb-6">Complete your sessions to earn certificates!</p>
-            <button onClick={() => navigate('/schedule')}
-              className="px-6 py-3 text-white font-semibold rounded-2xl"
-              style={{ background: "linear-gradient(135deg, #667eea, #764ba2)" }}>
-              View Sessions
-            </button>
+          <div className="space-y-6">
+            <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 text-center">
+              <p className="text-slate-500 text-sm mb-2">🌟 Here's a preview of your certificate!</p>
+              <p className="text-slate-400 text-xs mb-6">Complete a session to earn your real certificate</p>
+            </div>
+            <CertificateCard
+              userName={user?.name || 'Your Name'}
+              skillName="Your Skill Name"
+              date={new Date().toLocaleDateString()}
+              isPreview={true}
+            />
+            <div className="text-center">
+              <button onClick={() => navigate('/schedule')}
+                className="px-8 py-3 text-white font-semibold rounded-2xl"
+                style={{ background: "linear-gradient(135deg, #667eea, #764ba2)" }}>
+                View Sessions → Earn Certificate!
+              </button>
+            </div>
           </div>
         )}
       </main>
