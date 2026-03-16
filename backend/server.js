@@ -232,6 +232,8 @@ const matchingRoutes = require('./routes/matching');
 const ratingRoutes = require('./routes/ratings');
 const reviewsRouter = require('./routes/reviews');
 const subscriptionRoutes = require('./routes/subscription');
+const paymentRoutes = require('./routes/payments-razorpay');
+
 
 // User-specific rate limiting for authentication
 const userRateLimit = createUserRateLimit();
@@ -260,6 +262,7 @@ app.use('/api/matching', rateLimiters.search, matchingRoutes);
 app.use('/api/ratings', ratingRoutes);
 app.use('/api/reviews', reviewsRouter); 
 app.use('/api/subscription', subscriptionRoutes);
+app.use('/api/payments', paymentRoutes);
 
 app.use('/api/admin', rateLimiters.admin, adminRoutes);
 

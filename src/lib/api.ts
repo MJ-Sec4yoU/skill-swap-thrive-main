@@ -430,6 +430,19 @@ async cancelPlan() {
     body: JSON.stringify({}),
   });
 }
+async createPaymentOrder(plan: string) {
+  return this.request('/payments/create-order', {
+    method: 'POST',
+    body: JSON.stringify({ plan }),
+  });
+}
+
+async verifyPayment(paymentData: any) {
+  return this.request('/payments/verify', {
+    method: 'POST',
+    body: JSON.stringify(paymentData),
+  });
+}
 
 
   // Admin endpoints

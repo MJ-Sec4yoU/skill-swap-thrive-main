@@ -111,40 +111,70 @@ const Subscription = () => {
 
   // ── Upgrade / downgrade ──────────────────────────────────────────────────
   const handleSelectPlan = async (planKey: string) => {
-    if (planKey === currentPlan) return;
+  if (planKey === currentPlan) return;
 
-    const planName = PLANS.find(p => p.key === planKey)?.name;
-    const confirmMsg = planKey === "free"
-      ? "Are you sure you want to cancel your subscription and go back to Free?"
-      : `Upgrade to ${planName} plan for ${PLANS.find(p => p.key === planKey)?.priceLabel}/month?`;
-
-    if (!window.confirm(confirmMsg)) return;
-
-    setUpgrading(planKey);
-    try {
-      const res = planKey === "free"
-        ? await apiService.cancelPlan()
-        : await apiService.upgradePlan(planKey);
-
-      if ((res as any).error) {
-        toast({ title: "Error", description: (res as any).error, variant: "destructive" });
-        return;
-      }
-
-      toast({
-        title: planKey === "free" ? "Subscription cancelled" : `🎉 Upgraded to ${planName}!`,
-        description: planKey === "free"
-          ? "You are now on the Free plan."
-          : `Welcome to ${planName}! Enjoy your new features.`,
-      });
-
+  // Downgrade to free
+  if (planKey === "free") {
+    if (!window.confirm("Cancel subscription and go back to Free?")) return;
+    setUpgrading("free");
+    const res = await apiService.cancelPlan();
+    if (!(res as any).error) {
+      toast({ title: "Cancelled", description: "You are now on the Free plan." });
       await loadPlan();
-    } catch {
-      toast({ title: "Error", description: "Something went wrong.", variant: "destructive" });
-    } finally {
-      setUpgrading(null);
     }
-  };
+    setUpgrading(null);
+    return;
+  }
+
+  // Upgrade to pro/premium — open Razorpay popup
+  setUpgrading(planKey);
+  try {
+    const res = await apiService.createPaymentOrder(planKey);
+    if ((res as any).error) {
+      toast({ title: "Error", description: (res as any).error, variant: "destructive" });
+      setUpgrading(null);
+      return;
+    }
+
+    const { orderId, amount, currency, keyId, planName } = res.data as any;
+
+    const options = {
+      key: keyId,
+      amount,
+      currency,
+      name: "SwapLearnThrive",
+      description: `${planName} - 30 days`,
+      order_id: orderId,
+      handler: async (response: any) => {
+        // Payment done — verify it
+        const verifyRes = await apiService.verifyPayment({
+          razorpay_order_id: response.razorpay_order_id,
+          razorpay_payment_id: response.razorpay_payment_id,
+          razorpay_signature: response.razorpay_signature,
+          plan: planKey,
+        });
+        if ((verifyRes as any).error) {
+          toast({ title: "Verification failed", description: (verifyRes as any).error, variant: "destructive" });
+        } else {
+          toast({ title: "🎉 Payment successful!", description: `Welcome to ${planName}!` });
+          await loadPlan();
+        }
+        setUpgrading(null);
+      },
+      prefill: { name: "", email: "" },
+      theme: { color: "#667eea" },
+      modal: {
+        ondismiss: () => setUpgrading(null)
+      }
+    };
+
+    const rzp = new (window as any).Razorpay(options);
+    rzp.open();
+  } catch {
+    toast({ title: "Error", description: "Something went wrong.", variant: "destructive" });
+    setUpgrading(null);
+  }
+};
 
   // ── Helpers ──────────────────────────────────────────────────────────────
   const formatDate = (dateStr: string) => {
