@@ -517,5 +517,25 @@ async verifyPayment(paymentData: any) {
   async getVerificationStatus() {
     return this.request('/verification/status');
   }
+  async getPendingVerifications() {
+  return this.request('/verification/admin/pending');
+}
+
+async approveDocument(userId: string) {
+  return this.request(`/verification/admin/approve/${userId}`, {
+    method: 'PUT',
+    body: JSON.stringify({}),
+  });
+}
+
+async rejectDocument(userId: string, reason: string) {
+  return this.request(`/verification/admin/reject/${userId}`, {
+    method: 'PUT',
+    body: JSON.stringify({ reason }),
+  });
+}
+
 } 
+
+
 export const apiService = new ApiService();

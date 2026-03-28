@@ -131,7 +131,7 @@ const Onboarding = () => {
             title: "Profile Complete! 🎉",
             description: "Welcome to SkillSwap. Let's start your learning journey!"
           });
-          navigate("/dashboard");
+          navigate("/verify");
         } else {
           toast({
             title: "Error",
@@ -430,7 +430,7 @@ const Onboarding = () => {
             onClick={handleBack}
             disabled={step === 1}
             className="bg-white/10 border-white/20 text-white hover:bg-white/20"
-          >
+          > 
             Back
           </Button>
           <Button 
