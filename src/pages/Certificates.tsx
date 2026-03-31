@@ -53,7 +53,7 @@ const CertificateCard = ({ userName, skillName, date, mentorName, isPreview = fa
         {/* Full Name - positioned where "Full Name Here" appears */}
         <div style={{
           position: "absolute",
-          top: "25%",
+          top: "33%",
           left: "50%",
           transform: "translateX(-50%)",
           textAlign: "center",
@@ -90,7 +90,7 @@ const CertificateCard = ({ userName, skillName, date, mentorName, isPreview = fa
         {/* Date - positioned at the bottom-left where "26 April 2024" appears */}
         <div style={{
           position: "absolute",
-          top: "70%",
+          top: "73%",
           left: "15.5%",
           textAlign: "left",
         }}>
