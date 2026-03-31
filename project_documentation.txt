@@ -1,0 +1,90 @@
+=========================================================
+SwapLearnThrive (Skill Swap) - Project Documentation
+=========================================================
+
+1. PROJECT OVERVIEW
+-------------------
+SwapLearnThrive is a full-stack web application designed as a skill-swapping platform. It allows users to connect, trade skills (e.g., a developer teaching coding in exchange for learning guitar), schedule sessions, and earn visually appealing, dynamic certificates upon completion of courses. The platform includes real-time communication, an extensive dashboard, matching algorithms, and integrated secure payment capabilities.
+
+2. TECHNOLOGY STACK
+-------------------
+• Frontend:
+  - React 18 & TypeScript: Core library and language for robust UI building.
+  - Vite: Fast, modern front-end build tool.
+  - Tailwind CSS & Shadcn UI (Radix UI): For utility-first styling and accessible, pre-built components.
+  - React Router DOM: For client-side routing.
+  - React Hook Form & Zod: For form handling and schema validation.
+  - html2canvas & jsPDF: For generating downloadable skill-completion certificates.
+  - Recharts: For rendering analytics dashboards.
+  - Socket.io-client: For real-time updates/chat features.
+
+• Backend:
+  - Node.js & Express.js: Server runtime and framework for building REST APIs.
+  - MongoDB & Mongoose: NoSQL database and ODM for flexible data modeling (Users, Skills, Schedules, Tasks).
+  - JWT (JSON Web Tokens) & Bcrypt: Secure authentication, session management, and password hashing.
+  - Socket.io: Real-time bidirectional communication on the server.
+  - AWS SDK / Nodemailer / SMS Integrations: For sending OTPs, verifications, and email alerts.
+  - Razorpay: Payment gateway integration for premium features or direct transactions.
+
+• Security & Utilities:
+  - Helmet (HTTP headers), express-mongo-sanitize (prevent NoSQL injection), xss-clean, express-rate-limit (DDoS prevention).
+  - DOMPurify: Frontend protection against XSS.
+
+3. LOGIC & ALGORITHMS USED
+--------------------------
+1. Two-Way Skill Matching Algorithm: 
+   - Logic that examines User A's "skills offered" against User B's "skills wanted" and vice versa. Creates a matching percentage based on category intersection to suggest ideal learning partners.
+
+2. Dynamic Certificate Generation: 
+   - Uses `html2canvas` to render a responsive React component (which contains an absolute-positioned certificate template image and user-specific details) over a canvas. It then scales and injects this canvas into a PDF format using jsPDF, enforcing proper landscape aspect ratios.
+
+3. Real-Time Interactions (WebSockets): 
+   - Event-driven algorithm handling user connection states, chatting, and live notifications. Handshakes are secured and verified with JWT.
+
+4. Scheduling and Timestamps:
+   - Uses logic to detect time-zone differences and map available blocks of time, ensuring users in different regions don't double-book or miss meetings.
+
+5. OTP & Verification Flow:
+   - Random 6-digit numeric generator cryptographically processed and expiring after a short timeframe. Stored transiently for verification check against the user's input before issuing JWT.
+
+4. CORE FEATURES
+----------------
+- User Authentication: Secure Login/Signup with OTP verification (Email/SMS).
+- User Profiles & Dashboard: Track learning hours, completed sessions, and analytics via Recharts.
+- Skill Discovery Engine: Browse and match with other users based on skills taught and sought.
+- Certificates: Automatic, customizable PDF certificate generation with Verified Badges.
+- Real-time Notifications & Chat: Direct connection between mentors and students.
+- Payment Gateway: Integrated Razorpay for handling platform subscriptions or paid sessions.
+
+=========================================================
+5. COMMON EXAMINER QUESTIONS & HOW TO ANSWER THEM
+=========================================================
+
+Q1: "Why did you choose React + Vite instead of Next.js or traditional Create React App (CRA)?"
+Answer: Vite provides extremely fast Hot Module Replacement (HMR) and optimized build times compared to CRA by utilizing native ES modules. We chose React over Next.js because our app is heavily interactive (dashboards, chats, dynamic certificates) and doesn't explicitly require high-level SEO optimizations (SSR) for the user-authenticated parts of the platform.
+
+Q2: "How does your matching algorithm work?"
+Answer: When a user registers, they define two arrays: 'skills offered' and 'skills wanted'. The algorithm queries the MongoDB database for users where User A's sought skills exist in User B's offered skills. It scores these combinations. A 100% match occurs if both users have what the other wants simultaneously (a perfect swap). 
+
+Q3: "How is security handled in your application?"
+Answer: We implemented security on multiple layers. 
+- Passwords are hashed using bcrypt before going to the DB. 
+- Sessions use JWTs. 
+- Backend routes are protected against injections using `express-mongo-sanitize` and `xss-clean`. 
+- Rate limiting is enabled to prevent brute-force attacks. 
+- Forms are strictly validated on the frontend using Zod before submission.
+
+Q4: "How did you implement the Certificate Download feature?"
+Answer: We take advantage of client-side processing using `html2canvas` and `jsPDF`. The system holds a hidden or preview-state physical React HTML component overlaying a template JPEG. `html2canvas` takes a high-quality "screenshot" of this component, converts it into a Base64 image, and `jsPDF` structures it into an A4 landscape PDF file that is immediately downloaded to the user's device. This avoids putting heavy rendering loads on our server.
+
+Q5: "Why NoSQL (MongoDB) instead of SQL (MySQL/PostgreSQL)?"
+Answer: Given the flexible nature of User Profiles, Skills, and dynamic scheduling requirements, the schema needs to be agile. MongoDB allowed us to embed related documents easily (like an array of user achievements or preferred times) without complex join tables.
+
+Q6: "How does the real-time functionality work?"
+Answer: We used Socket.io. When a user logs in, the client establishes a persistent WebSocket connection to the Node.js server. The server keeps a mapping of connected User IDs to their unique socket IDs. When User A sends a message or books a class with User B, the server emits an event directly to User B's active socket, enabling instant UI updates without refreshing the page.
+
+Q7: "What was the hardest challenge you faced?"
+Answer: (Feel free to personalize this, but good examples are:)
+- Synchronizing absolute elements perfectly over the certificate template so it looks correct across different screen sizes before PDF conversion.
+- Understanding and correctly configuring secure WebSocket handshakes alongside JWT auth.
+- Handling timezone logic in the scheduling API.

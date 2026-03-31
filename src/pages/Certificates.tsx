@@ -53,14 +53,14 @@ const CertificateCard = ({ userName, skillName, date, mentorName, isPreview = fa
         {/* Full Name - positioned where "Full Name Here" appears */}
         <div style={{
           position: "absolute",
-          top: "33%",
+          top: "28%",
           left: "50%",
           transform: "translateX(-50%)",
           textAlign: "center",
           width: "70%",
         }}>
           <h2 style={{
-            fontSize: "clamp(20px, 4vw, 42px)",
+            fontSize: "clamp(24px, 4vw, 42px)",
             fontWeight: "700",
             margin: 0,
             color: "#2d1248",
@@ -72,14 +72,14 @@ const CertificateCard = ({ userName, skillName, date, mentorName, isPreview = fa
         {/* Course/Skill Name - positioned where "Course Name Here" pill appears */}
         <div style={{
           position: "absolute",
-          top: "51.5%",
+          top: "56%",
           left: "50%",
           transform: "translateX(-50%)",
           textAlign: "center",
           width: "60%",
         }}>
           <span style={{
-            fontSize: "clamp(14px, 2.5vw, 24px)",
+            fontSize: "clamp(16px, 2.5vw, 24px)",
             fontWeight: "700",
             color: "#3d1f5c",
             fontFamily: "'Georgia', serif",
