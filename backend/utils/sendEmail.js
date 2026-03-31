@@ -16,8 +16,17 @@ const transporter = nodemailer.createTransport({
  * @param {string} otp - 6 digit OTP code
  */
 const sendOTPEmail = async (toEmail, otp) => {
+  // Development Mock: If no email configuration is provided, just log the OTP to the console
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    console.log(`\n======================================`);
+    console.log(`✉️  MOCK EMAIL SENT TO: ${toEmail}`);
+    console.log(`🔑 OTP CODE: ${otp}`);
+    console.log(`======================================\n`);
+    return; // Fast success for development
+  }
+
   const mailOptions = {
-    from: `"SwapLearnThrive" <${process.env.FROM_EMAIL}>`,
+    from: `"SwapLearnThrive" <${process.env.FROM_EMAIL || process.env.SMTP_USER}>`,
     to: toEmail,
     subject: `${otp} is your SwapLearnThrive verification code`,
     html: `

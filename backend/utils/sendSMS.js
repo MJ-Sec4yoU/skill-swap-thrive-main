@@ -6,6 +6,15 @@ const https = require('https');
  * @param {string} otp - 6 digit OTP code
  */
 const sendOTPSMS = async (phoneNumber, otp) => {
+  // Development Mock: If no API key is set, mock the SMS send
+  if (!process.env.FAST2SMS_API_KEY) {
+    console.log(`\n======================================`);
+    console.log(`📱 MOCK SMS SENT TO: ${phoneNumber}`);
+    console.log(`🔑 OTP CODE: ${otp}`);
+    console.log(`======================================\n`);
+    return { return: true, message: 'Mock SMS Sent' };
+  }
+
   // Remove +91 or 91 prefix if present, keep only 10 digits
   const cleanPhone = phoneNumber.replace(/^(\+91|91)/, '').trim();
 
