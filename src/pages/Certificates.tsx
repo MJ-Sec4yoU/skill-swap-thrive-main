@@ -53,7 +53,7 @@ const CertificateCard = ({ userName, skillName, date, mentorName, isPreview = fa
         {/* Full Name - positioned where "Full Name Here" appears */}
         <div style={{
           position: "absolute",
-          top: "35%",
+          top: "25%",
           left: "50%",
           transform: "translateX(-50%)",
           textAlign: "center",
@@ -72,7 +72,7 @@ const CertificateCard = ({ userName, skillName, date, mentorName, isPreview = fa
         {/* Course/Skill Name - positioned where "Course Name Here" pill appears */}
         <div style={{
           position: "absolute",
-          top: "53%",
+          top: "49%",
           left: "50%",
           transform: "translateX(-50%)",
           textAlign: "center",
@@ -90,7 +90,7 @@ const CertificateCard = ({ userName, skillName, date, mentorName, isPreview = fa
         {/* Date - positioned at the bottom-left where "26 April 2024" appears */}
         <div style={{
           position: "absolute",
-          top: "76%",
+          top: "70%",
           left: "15.5%",
           textAlign: "left",
         }}>
@@ -186,7 +186,7 @@ const Certificates = () => {
         <div className="flex items-center gap-4 mb-8">
           <button onClick={() => navigate('/dashboard')}
             className="flex items-center gap-2 px-4 py-2 text-white font-semibold rounded-xl transition-all hover:opacity-90"
-style={{ background: "linear-gradient(135deg, #667eea, #764ba2)", boxShadow: "0 0 20px rgba(102,126,234,0.5)" }}>
+            style={{ background: "linear-gradient(135deg, #667eea, #764ba2)", boxShadow: "0 0 20px rgba(102,126,234,0.5)" }}>
             <ArrowLeft className="w-4 h-4" /> Back to Dashboard
           </button>
           <div>
