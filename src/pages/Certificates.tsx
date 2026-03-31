@@ -25,7 +25,7 @@ const CertificateCard = ({ userName, skillName, date, mentorName, isPreview = fa
     }}>
       {/* Certificate template image as background */}
       <img
-        src="/certificate-template.jpg"
+        src="/certificate-template.png"
         alt="Certificate Background"
         style={{
           position: "absolute",
