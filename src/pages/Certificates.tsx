@@ -13,129 +13,218 @@ const CertificateCard = ({ userName, skillName, date, mentorName, isPreview = fa
   date: string;
   mentorName?: string;
   isPreview?: boolean;
-}) => (
-  <div style={{
-    borderRadius: "24px",
-    overflow: "hidden",
-    boxShadow: "0 25px 80px rgba(102,126,234,0.4)",
-    position: "relative",
-    background: "linear-gradient(135deg, #2d1b69, #4c1d95, #6d28d9)",
-    border: "1px solid rgba(255,255,255,0.15)"
-  }}>
-    <div style={{ position: "absolute", top: "-60px", right: "-60px", width: "250px", height: "250px", borderRadius: "50%", background: "rgba(167,139,250,0.15)", pointerEvents: "none" }} />
-    <div style={{ position: "absolute", bottom: "-60px", left: "-60px", width: "200px", height: "200px", borderRadius: "50%", background: "rgba(240,147,251,0.1)", pointerEvents: "none" }} />
-    <div style={{ position: "absolute", top: "50%", left: "-80px", width: "200px", height: "200px", borderRadius: "50%", background: "rgba(102,126,234,0.1)", pointerEvents: "none" }} />
+}) => {
+  // Sparkle particles
+  const sparkles = Array.from({ length: 30 }, (_, i) => ({
+    left: `${Math.random() * 100}%`,
+    top: `${Math.random() * 100}%`,
+    size: Math.random() * 3 + 1,
+    opacity: Math.random() * 0.6 + 0.2,
+    delay: Math.random() * 3,
+  }));
 
-    <div style={{ padding: "40px 50px", textAlign: "center", position: "relative" }}>
-
-      {/* Logo */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", marginBottom: "4px" }}>
-        <div style={{
-          width: "44px", height: "44px", borderRadius: "50%",
-          background: "#7c3aed",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          boxShadow: "0 0 0 3px rgba(255,255,255,0.2)"
-        }}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </div>
-        <span style={{ fontSize: "20px", fontWeight: "800", color: "white", letterSpacing: "-0.5px" }}>SwapLearnThrive</span>
-      </div>
-
-      {/* Divider */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "12px", margin: "14px 0" }}>
-        <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.2)" }} />
-        <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.6)", letterSpacing: "3px", textTransform: "uppercase" }}>Certificate of Completion</span>
-        <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.2)" }} />
-      </div>
-
-      {/* Name Box */}
+  return (
+    <div style={{
+      borderRadius: "12px",
+      overflow: "hidden",
+      boxShadow: "0 25px 80px rgba(139,92,182,0.35)",
+      position: "relative",
+      background: "linear-gradient(145deg, #c9a0dc 0%, #b07cc6 15%, #9b6fb5 30%, #a87dc0 50%, #c4a0d8 70%, #d4b8e4 85%, #c09cd0 100%)",
+      border: "8px solid transparent",
+      backgroundClip: "padding-box",
+      aspectRatio: "1.42 / 1",
+    }}>
+      {/* Golden ornamental border */}
       <div style={{
-        margin: "16px 0", padding: "20px 30px",
-        background: "rgba(255,255,255,0.08)",
-        borderRadius: "16px", border: "1px solid rgba(255,255,255,0.15)"
-      }}>
-        <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "12px", margin: "0 0 8px", textTransform: "uppercase", letterSpacing: "2px" }}>This is to certify that</p>
-        <h2 style={{ fontSize: "30px", fontWeight: "900", margin: 0, color: "white", fontFamily: "Georgia, serif", textShadow: "0 2px 10px rgba(167,139,250,0.5)" }}>{userName}</h2>
-      </div>
-
-      <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "14px", margin: "12px 0" }}>has successfully mastered</p>
-
-      {/* Skill */}
+        position: "absolute", inset: 0,
+        border: "3px solid rgba(180,140,60,0.5)",
+        borderRadius: "4px",
+        margin: "8px",
+        pointerEvents: "none",
+      }} />
       <div style={{
-        display: "inline-block", padding: "10px 36px",
-        background: "white", borderRadius: "50px",
-        marginBottom: "12px", boxShadow: "0 8px 24px rgba(0,0,0,0.3)"
-      }}>
-        <span style={{
-          fontSize: "20px", fontWeight: "900",
-          background: "linear-gradient(135deg, #667eea, #764ba2)",
-          WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent"
-        }}>{skillName}</span>
-      </div>
+        position: "absolute", inset: 0,
+        border: "1px solid rgba(180,140,60,0.3)",
+        borderRadius: "4px",
+        margin: "14px",
+        pointerEvents: "none",
+      }} />
 
-      {mentorName && (
-        <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "13px", margin: "0 0 16px" }}>
-          under the guidance of <strong style={{ color: "#c4b5fd" }}>{mentorName}</strong>
-        </p>
-      )}
+      {/* Corner ornaments - Top Left */}
+      <svg style={{ position: "absolute", top: "4px", left: "4px", width: "80px", height: "80px", opacity: 0.6 }} viewBox="0 0 80 80" fill="none">
+        <path d="M10 40 C10 20 20 10 40 10" stroke="rgba(180,140,60,0.7)" strokeWidth="1.5" fill="none"/>
+        <path d="M15 45 C15 25 25 15 45 15" stroke="rgba(180,140,60,0.5)" strokeWidth="1" fill="none"/>
+        <circle cx="20" cy="20" r="3" fill="rgba(180,140,60,0.5)"/>
+        <path d="M8 8 C8 8 20 12 20 20 C12 20 8 8 8 8Z" fill="rgba(180,140,60,0.3)"/>
+      </svg>
 
-      {/* Dots */}
-      <div style={{ display: "flex", justifyContent: "center", gap: "8px", margin: "12px 0" }}>
-        <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#a78bfa" }} />
-        <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#f093fb" }} />
-        <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#667eea" }} />
-      </div>
+      {/* Corner ornaments - Top Right */}
+      <svg style={{ position: "absolute", top: "4px", right: "4px", width: "80px", height: "80px", opacity: 0.6, transform: "scaleX(-1)" }} viewBox="0 0 80 80" fill="none">
+        <path d="M10 40 C10 20 20 10 40 10" stroke="rgba(180,140,60,0.7)" strokeWidth="1.5" fill="none"/>
+        <path d="M15 45 C15 25 25 15 45 15" stroke="rgba(180,140,60,0.5)" strokeWidth="1" fill="none"/>
+        <circle cx="20" cy="20" r="3" fill="rgba(180,140,60,0.5)"/>
+        <path d="M8 8 C8 8 20 12 20 20 C12 20 8 8 8 8Z" fill="rgba(180,140,60,0.3)"/>
+      </svg>
 
-      {/* Footer */}
-      <div style={{
-        display: "flex", justifyContent: "space-between", alignItems: "flex-end",
-        padding: "16px 20px",
-        background: "rgba(0,0,0,0.2)", borderRadius: "12px",
-        marginTop: "16px", border: "1px solid rgba(255,255,255,0.1)"
-      }}>
-        <div style={{ textAlign: "left" }}>
-          <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "10px", margin: 0, textTransform: "uppercase", letterSpacing: "1.5px" }}>Date issued</p>
-          <p style={{ color: "white", fontSize: "13px", fontWeight: "700", margin: "3px 0 0" }}>{date}</p>
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+      {/* Corner ornaments - Bottom Left */}
+      <svg style={{ position: "absolute", bottom: "4px", left: "4px", width: "80px", height: "80px", opacity: 0.6, transform: "scaleY(-1)" }} viewBox="0 0 80 80" fill="none">
+        <path d="M10 40 C10 20 20 10 40 10" stroke="rgba(180,140,60,0.7)" strokeWidth="1.5" fill="none"/>
+        <path d="M15 45 C15 25 25 15 45 15" stroke="rgba(180,140,60,0.5)" strokeWidth="1" fill="none"/>
+        <circle cx="20" cy="20" r="3" fill="rgba(180,140,60,0.5)"/>
+        <path d="M8 8 C8 8 20 12 20 20 C12 20 8 8 8 8Z" fill="rgba(180,140,60,0.3)"/>
+      </svg>
+
+      {/* Corner ornaments - Bottom Right */}
+      <svg style={{ position: "absolute", bottom: "4px", right: "4px", width: "80px", height: "80px", opacity: 0.6, transform: "scale(-1)" }} viewBox="0 0 80 80" fill="none">
+        <path d="M10 40 C10 20 20 10 40 10" stroke="rgba(180,140,60,0.7)" strokeWidth="1.5" fill="none"/>
+        <path d="M15 45 C15 25 25 15 45 15" stroke="rgba(180,140,60,0.5)" strokeWidth="1" fill="none"/>
+        <circle cx="20" cy="20" r="3" fill="rgba(180,140,60,0.5)"/>
+        <path d="M8 8 C8 8 20 12 20 20 C12 20 8 8 8 8Z" fill="rgba(180,140,60,0.3)"/>
+      </svg>
+
+      {/* Sparkle particles */}
+      {sparkles.map((s, i) => (
+        <div key={i} style={{
+          position: "absolute",
+          left: s.left,
+          top: s.top,
+          width: `${s.size}px`,
+          height: `${s.size}px`,
+          borderRadius: "50%",
+          background: "white",
+          opacity: s.opacity,
+          pointerEvents: "none",
+          boxShadow: `0 0 ${s.size * 2}px rgba(255,255,255,0.5)`,
+        }} />
+      ))}
+
+      {/* Light overlay blobs */}
+      <div style={{ position: "absolute", top: "-30%", right: "-10%", width: "60%", height: "60%", borderRadius: "50%", background: "radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%)", pointerEvents: "none" }} />
+      <div style={{ position: "absolute", bottom: "-20%", left: "-10%", width: "50%", height: "50%", borderRadius: "50%", background: "radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%)", pointerEvents: "none" }} />
+
+      {/* Content */}
+      <div style={{ padding: "36px 50px 28px", textAlign: "center", position: "relative", height: "100%", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+
+        {/* Logo */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", marginBottom: "2px" }}>
           <div style={{
-            width: "54px", height: "54px", borderRadius: "50%",
-            background: "rgba(255,255,255,0.15)",
-            border: "2px solid rgba(255,255,255,0.3)",
-            display: "flex", alignItems: "center", justifyContent: "center"
+            width: "40px", height: "40px", borderRadius: "10px",
+            background: "#6b3fa0",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            boxShadow: "0 4px 12px rgba(107,63,160,0.4)"
           }}>
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-              <path d="M9 12l2 2 4-4" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-              <circle cx="12" cy="12" r="9" stroke="white" strokeWidth="1.5"/>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
-          <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.5)", letterSpacing: "1px", textTransform: "uppercase" }}>Verified</span>
+          <span style={{ fontSize: "22px", fontWeight: "700", color: "#3d1f5c", letterSpacing: "-0.3px", fontFamily: "'Georgia', serif" }}>SwapLearnThrive</span>
         </div>
-        <div style={{ textAlign: "right" }}>
-          <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "10px", margin: 0, textTransform: "uppercase", letterSpacing: "1.5px" }}>Issued by</p>
-          <p style={{ color: "white", fontSize: "13px", fontWeight: "700", margin: "3px 0 0" }}>SwapLearnThrive</p>
-        </div>
-      </div>
 
-      {isPreview && (
-        <div style={{
-          marginTop: "16px", padding: "12px 20px",
-          background: "rgba(255,255,255,0.08)",
-          borderRadius: "12px", border: "1px dashed rgba(255,255,255,0.3)"
-        }}>
-          <p style={{ color: "rgba(255,255,255,0.8)", fontSize: "13px", fontWeight: "600", margin: 0 }}>
-            🌟 Sample Preview — Complete a session to earn your real certificate!
+        {/* Divider with title */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "16px", margin: "10px 0 16px" }}>
+          <div style={{ flex: 1, height: "1px", background: "linear-gradient(90deg, transparent, rgba(100,50,120,0.4), transparent)" }} />
+          <span style={{ fontSize: "11px", color: "rgba(80,40,100,0.7)", letterSpacing: "4px", textTransform: "uppercase", fontWeight: "600", fontFamily: "'Georgia', serif" }}>Certificate of Completion</span>
+          <div style={{ flex: 1, height: "1px", background: "linear-gradient(90deg, transparent, rgba(100,50,120,0.4), transparent)" }} />
+        </div>
+
+        {/* "This is to certify that" */}
+        <p style={{ color: "rgba(80,40,100,0.65)", fontSize: "12px", margin: "0 0 6px", textTransform: "uppercase", letterSpacing: "3px", fontFamily: "'Georgia', serif" }}>This is to certify that</p>
+
+        {/* Full Name */}
+        <h2 style={{
+          fontSize: "36px", fontWeight: "700", margin: "4px 0 10px",
+          color: "#2d1248",
+          fontFamily: "'Georgia', 'Times New Roman', serif",
+          textShadow: "0 1px 4px rgba(139,92,182,0.2)",
+          letterSpacing: "0.5px"
+        }}>{userName}</h2>
+
+        <p style={{ color: "rgba(80,40,100,0.6)", fontSize: "14px", margin: "0 0 14px", fontFamily: "'Georgia', serif" }}>has successfully mastered</p>
+
+        {/* Course Name Pill */}
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: "14px" }}>
+          <div style={{
+            display: "inline-block", padding: "10px 40px",
+            background: "linear-gradient(135deg, rgba(180,160,220,0.6), rgba(200,180,230,0.5), rgba(160,140,200,0.6))",
+            borderRadius: "50px",
+            border: "1px solid rgba(255,255,255,0.4)",
+            boxShadow: "0 4px 20px rgba(139,92,182,0.2), inset 0 1px 2px rgba(255,255,255,0.3)",
+            backdropFilter: "blur(8px)",
+          }}>
+            <span style={{
+              fontSize: "20px", fontWeight: "700",
+              color: "#3d1f5c",
+              fontFamily: "'Georgia', serif",
+              letterSpacing: "0.5px"
+            }}>{skillName}</span>
+          </div>
+        </div>
+
+        {mentorName && (
+          <p style={{ color: "rgba(80,40,100,0.6)", fontSize: "13px", margin: "0 0 14px", fontFamily: "'Georgia', serif" }}>
+            under the guidance of a <strong style={{ color: "#4a2070", fontWeight: "700" }}>SwapLearnThrive Mentor</strong>
           </p>
-        </div>
-      )}
-    </div>
+        )}
 
-    <div style={{ height: "6px", background: "linear-gradient(90deg, #667eea, #a78bfa, #f093fb, #764ba2)" }} />
-  </div>
-);
+        {/* Footer: Date / Verified / Issued by */}
+        <div style={{
+          display: "flex", justifyContent: "space-between", alignItems: "center",
+          padding: "0 20px",
+          marginTop: "auto",
+        }}>
+          <div style={{ textAlign: "left" }}>
+            <p style={{ color: "rgba(80,40,100,0.5)", fontSize: "9px", margin: 0, textTransform: "uppercase", letterSpacing: "2px", fontWeight: "600" }}>Date Issued</p>
+            <p style={{ color: "#3d1f5c", fontSize: "14px", fontWeight: "700", margin: "4px 0 0", fontFamily: "'Georgia', serif" }}>{date}</p>
+          </div>
+
+          {/* Verified Badge */}
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+            <div style={{
+              width: "52px", height: "52px", borderRadius: "50%",
+              background: "linear-gradient(135deg, rgba(180,160,220,0.5), rgba(200,180,240,0.4))",
+              border: "2px solid rgba(139,92,182,0.4)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              boxShadow: "0 4px 16px rgba(139,92,182,0.2)",
+            }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M9 12l2 2 4-4" stroke="#6b3fa0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <circle cx="12" cy="12" r="9" stroke="#6b3fa0" strokeWidth="1.5"/>
+              </svg>
+            </div>
+            <span style={{ fontSize: "8px", color: "rgba(80,40,100,0.5)", letterSpacing: "2px", textTransform: "uppercase", fontWeight: "600" }}>Verified</span>
+          </div>
+
+          <div style={{ textAlign: "right" }}>
+            <p style={{ color: "rgba(80,40,100,0.5)", fontSize: "9px", margin: 0, textTransform: "uppercase", letterSpacing: "2px", fontWeight: "600" }}>Issued By</p>
+            <p style={{ color: "#3d1f5c", fontSize: "14px", fontWeight: "700", margin: "4px 0 0", fontFamily: "'Georgia', serif" }}>SwapLearnThrive</p>
+          </div>
+        </div>
+
+        {/* Bottom tagline */}
+        <p style={{
+          color: "rgba(80,40,100,0.45)", fontSize: "10px", margin: "16px 0 0",
+          fontFamily: "'Georgia', serif", fontStyle: "italic",
+          letterSpacing: "0.5px"
+        }}>
+          This certificate is awarded for successfully mastering the specified course.
+        </p>
+
+        {isPreview && (
+          <div style={{
+            marginTop: "12px", padding: "10px 20px",
+            background: "rgba(255,255,255,0.2)",
+            borderRadius: "12px", border: "1px dashed rgba(100,50,120,0.3)"
+          }}>
+            <p style={{ color: "rgba(80,40,100,0.7)", fontSize: "13px", fontWeight: "600", margin: 0 }}>
+              🌟 Sample Preview — Complete a session to earn your real certificate!
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 const Certificates = () => {
   const navigate = useNavigate();
@@ -164,7 +253,7 @@ const Certificates = () => {
     try {
       const canvas = await html2canvas(element, {
         scale: 3, useCORS: true,
-        backgroundColor: "#2d1b69", logging: false
+        backgroundColor: "#b07cc6", logging: false
       });
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('landscape', 'mm', 'a4');
