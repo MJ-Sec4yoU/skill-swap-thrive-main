@@ -25,7 +25,7 @@ const CertificateCard = ({ userName, skillName, date, mentorName, isPreview = fa
     }}>
       {/* Certificate template image as background */}
       <img
-        src="/certificate-template.png"
+        src="/certificate-template.jpg"
         alt="Certificate Background"
         style={{
           position: "absolute",
@@ -53,7 +53,7 @@ const CertificateCard = ({ userName, skillName, date, mentorName, isPreview = fa
         {/* Full Name - positioned where "Full Name Here" appears */}
         <div style={{
           position: "absolute",
-          top: "28%",
+          top: "35%",
           left: "50%",
           transform: "translateX(-50%)",
           textAlign: "center",
@@ -72,7 +72,7 @@ const CertificateCard = ({ userName, skillName, date, mentorName, isPreview = fa
         {/* Course/Skill Name - positioned where "Course Name Here" pill appears */}
         <div style={{
           position: "absolute",
-          top: "56%",
+          top: "53%",
           left: "50%",
           transform: "translateX(-50%)",
           textAlign: "center",
