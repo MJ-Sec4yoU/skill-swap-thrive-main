@@ -124,11 +124,11 @@ router.post('/', auth, async (req, res) => {
     // 3. Add current prompt
     messages.push({ role: 'user', content: message });
 
-    // Make the request to OpenRouter with fallback models
+    // Verified working free models (tested live with actual API key)
     const FREE_MODELS = [
-      "meta-llama/llama-3.3-70b-instruct:free",
-      "qwen/qwen3-coder:free",
       "google/gemma-3-27b-it:free",
+      "google/gemma-3-4b-it:free",
+      "liquid/lfm-2.5-1.2b-instruct:free",
     ];
 
     let lastError = null;
