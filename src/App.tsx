@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
 import VerifyOTP from "./pages/VerifyOTP";
 import AdminRoute from "./components/AdminRoute";
+import SmartAssistant from "./components/SmartAssistant";
 
 const ReviewsPage = lazy(() => import("./pages/Reviews"));
 const MySkills = lazy(() => import("./pages/MySkills"));
@@ -32,6 +33,7 @@ const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const AdminAnalytics = lazy(() => import("./pages/AdminAnalytics"));
 const SkillsVisualization = lazy(() => import("./pages/SkillsVisualization"));
 const Certificates = lazy(() => import("./pages/Certificates"));
+const Advertise = lazy(() => import("./pages/Advertise"));
 
 const queryClient = new QueryClient();
 
@@ -73,10 +75,12 @@ const App = () => (
 <Route path="/verify" element={<VerifyOTP />} /> 
 <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />
           <Route path="/reviews/:userId" element={<ReviewsPage />} />
+          <Route path="/advertise" element={<Advertise />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
+        <SmartAssistant />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
