@@ -6,6 +6,7 @@ import { Send, MessageSquare, Search } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { API_BASE_URL } from "@/lib/api";
 
 interface Message {
   _id: string;
@@ -48,7 +49,7 @@ const Messages = () => {
   const location = useLocation();
 
   const token = localStorage.getItem("token");
-  const API = "http://localhost:5000";
+  const API = API_BASE_URL; // e.g. "https://your-backend.onrender.com/api"
   //  Auto-open conversation if coming from Message button
 useEffect(() => {
   if (location.state?.recipientId) {
@@ -59,7 +60,7 @@ useEffect(() => {
   // Fetch all messages and build conversation list
   const fetchMessages = async () => {
     try {
-     const res = await fetch(`${API}/api/messages`, { 
+     const res = await fetch(`${API}/messages`, { 
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -108,7 +109,7 @@ useEffect(() => {
       (m) => m.sender._id === userId && !m.isRead
     );
     for (const msg of unreadMsgs) {
-     await fetch(`${API}/api/messages/${msg._id}/read`, {
+     await fetch(`${API}/messages/${msg._id}/read`, {
         method: "PUT",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -121,7 +122,7 @@ useEffect(() => {
     if (!newMessage.trim() || !selectedUserId) return;
     setSending(true);
     try {
-     const res = await fetch(`${API}/api/messages`, {
+     const res = await fetch(`${API}/messages`, {
   method: "POST", 
         headers: {
           "Content-Type": "application/json",

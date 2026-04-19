@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
+import { API_BASE_URL } from "@/lib/api";
 import { ReviewCard } from "@/components/ReviewCard";
 import { ReviewForm } from "@/components/ReviewForm";
 import { RatingSummary } from "@/components/RatingSummary";
@@ -54,7 +55,7 @@ export default function ReviewsPage() {
   try {
     const token = localStorage.getItem("token");
     const res = await fetch(
-      `http://localhost:5000/api/reviews/user/${userId}?page=${page}&limit=8&sort=${sort}`,
+      `${API_BASE_URL}/reviews/user/${userId}?page=${page}&limit=8&sort=${sort}`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     const data = await res.json();
@@ -72,7 +73,7 @@ export default function ReviewsPage() {
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this review?")) return;
     const token = localStorage.getItem("token");
-   await fetch(`http://localhost:5000/api/reviews/${id}`, {
+   await fetch(`${API_BASE_URL}/reviews/${id}`, {
   method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     });

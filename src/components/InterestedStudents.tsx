@@ -14,7 +14,7 @@ import {
   X,
   RefreshCw
 } from 'lucide-react';
-import { apiService } from '@/lib/api';
+import { apiService, API_BASE_URL } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 
@@ -66,7 +66,7 @@ const fetchRatings = async (students: InterestedStudent[]) => {
     students.map(async (match) => {
       try {
         const res = await fetch(
-          `http://localhost:5000/api/reviews/user/${match.student._id}`,
+          `${API_BASE_URL}/reviews/user/${match.student._id}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         const data = await res.json();

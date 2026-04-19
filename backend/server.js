@@ -53,6 +53,8 @@ const productionOrigins = [
   process.env.FRONTEND_URL_2, // Secondary domain if needed
   'https://skillswapthrive.netlify.app',
   'https://skillswapthrive.netlify.app/',
+  'https://skillswapfontend.netlify.app',
+  'https://skillswapfontend.netlify.app/',
 ].filter(Boolean); // Remove undefined/empty values
 
 const allowedOrigins = isDevelopment ? developmentOrigins : productionOrigins;

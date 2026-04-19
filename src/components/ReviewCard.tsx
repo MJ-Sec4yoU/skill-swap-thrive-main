@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ThumbsUp, Flag, MoreHorizontal, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { API_BASE_URL } from "@/lib/api";
 
 interface Review {
   _id: string;
@@ -50,7 +51,7 @@ export const ReviewCard = ({ review, currentUserId, onDelete, onEdit }: ReviewCa
     if (voted) return;
     try {
       const token = localStorage.getItem("token");
-      await fetch(`http://localhost:5000/api/reviews/${review._id}/helpful`, {
+      await fetch(`${API_BASE_URL}/reviews/${review._id}/helpful`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -62,7 +63,7 @@ export const ReviewCard = ({ review, currentUserId, onDelete, onEdit }: ReviewCa
   const handleReport = async () => {
     if (!confirm("Report this review as inappropriate?")) return;
     const token = localStorage.getItem("token");
-    await fetch(`http://localhost:5000/api/reviews/${review._id}/report`, {
+    await fetch(`${API_BASE_URL}/reviews/${review._id}/report`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
     });

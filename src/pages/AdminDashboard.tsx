@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { apiService } from '@/lib/api';
+import { apiService, ASSET_BASE_URL } from '@/lib/api';
 import { Search, Filter, Calendar, MessageSquare, User, Trash2, Activity, Shield, AlertTriangle, CheckCircle, TrendingUp } from 'lucide-react';
 
 const AdminDashboard = () => {
@@ -455,13 +455,13 @@ const AdminDashboard = () => {
                           {/* Document image preview */}
                           {u.documentPath && (
                             <a
-                              href={`http://localhost:5000/uploads/${u.documentPath}`}
+                              href={`${ASSET_BASE_URL}/uploads/${u.documentPath}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="flex-shrink-0"
                             >
                               <img
-                                src={`http://localhost:5000/uploads/${u.documentPath}`}
+                                src={`${ASSET_BASE_URL}/uploads/${u.documentPath}`}
                                 alt="Uploaded document"
                                 className="w-28 h-20 object-cover rounded-lg border hover:opacity-80 transition-opacity cursor-pointer"
                                 onError={(e) => { (e.target as any).style.display = 'none'; }}

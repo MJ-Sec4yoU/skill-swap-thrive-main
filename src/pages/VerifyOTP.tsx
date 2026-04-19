@@ -5,7 +5,7 @@ import {
   CheckCircle, Upload, FileText, CreditCard, Clock
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { apiService } from "@/lib/api";
+import { apiService, API_BASE_URL } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import Header from "@/components/Header";
 
@@ -136,7 +136,7 @@ const VerifyOTP = () => {
       formData.append("document", docFile);
       formData.append("documentType", docType);
 
-      const response = await fetch(`${(apiService as any).getBaseURL?.() || 'http://localhost:5000/api'}/verification/upload-document`, {
+      const response = await fetch(`${API_BASE_URL}/verification/upload-document`, {
         method: "POST",
         headers: { Authorization: `Bearer ${apiService.getToken()}` },
         body: formData,

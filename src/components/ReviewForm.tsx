@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, Send, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { API_BASE_URL } from "@/lib/api";
 
 // These are the clickable tag options
 const TAGS = ["patient", "knowledgeable", "clear", "punctual", "friendly", "engaging", "prepared"] as const;
@@ -57,7 +58,7 @@ export const ReviewForm = ({ revieweeId, revieweeName, sessionId, onSuccess, onC
   const onSubmit = async (data: FormData) => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:5000/api/reviews", {
+      const res = await fetch(`${API_BASE_URL}/reviews`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
