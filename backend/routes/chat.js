@@ -4,7 +4,7 @@ const { auth } = require('../middleware/auth');
 const router = express.Router();
 
 // ── Gemini 2.0 Flash (free tier) ────────────────────────────────────────────
-const GEMINI_MODEL = 'gemini-2.0-flash';
+const GEMINI_MODEL = 'gemini-1.5-flash';
 
 // Helper: make HTTPS POST request (works on all Node.js versions)
 function postJSON(url, body) {
@@ -163,7 +163,18 @@ router.post('/', auth, async (req, res) => {
 
     if (result.status !== 200) {
       console.error('Gemini API error:', result.status, result.body);
-      return res.status(502).json({ message: 'AI service temporarily unavailable. Please try again.' });
+      
+      let errorMsg = 'AI service temporarily unavailable.';
+      try {
+        const parsed = JSON.parse(result.body);
+        if (parsed.error && parsed.error.message) {
+          errorMsg = `API Error: ${parsed.error.message}`;
+        }
+      } catch (e) {
+        errorMsg = `API Error (${result.status}): ${result.body}`;
+      }
+      
+      return res.status(502).json({ message: errorMsg });
     }
 
     const data = JSON.parse(result.body);
