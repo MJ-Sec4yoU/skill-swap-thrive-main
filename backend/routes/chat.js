@@ -1,11 +1,40 @@
 const express = require('express');
+const https = require('https');
 const { auth } = require('../middleware/auth');
 const router = express.Router();
 
 // ── Gemini 2.0 Flash (free tier) ────────────────────────────────────────────
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_MODEL = 'gemini-2.0-flash';
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=`;
+
+// Helper: make HTTPS POST request (works on all Node.js versions)
+function postJSON(url, body) {
+  return new Promise((resolve, reject) => {
+    const data = JSON.stringify(body);
+    const parsed = new URL(url);
+    const options = {
+      hostname: parsed.hostname,
+      path: parsed.pathname + parsed.search,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(data),
+      },
+    };
+
+    const req = https.request(options, (res) => {
+      let body = '';
+      res.on('data', (chunk) => { body += chunk; });
+      res.on('end', () => {
+        resolve({ status: res.statusCode, body });
+      });
+    });
+
+    req.on('error', reject);
+    req.setTimeout(30000, () => { req.destroy(new Error('Request timeout')); });
+    req.write(data);
+    req.end();
+  });
+}
 
 // Platform-aware system prompt
 const SYSTEM_PROMPT = `You are **SwapBot**, the smart AI assistant for **SwapLearnThrive** — a skill exchange platform where people teach what they know and learn what they want.
@@ -83,8 +112,10 @@ router.post('/', auth, async (req, res) => {
       return res.status(400).json({ message: 'Message too long (max 1000 characters)' });
     }
 
-    if (!GEMINI_API_KEY) {
-      // Fallback: return a helpful static response if no API key is configured
+    // Read API key at request time (picks up env vars added after server start)
+    const apiKey = process.env.GEMINI_API_KEY;
+
+    if (!apiKey) {
       return res.json({
         reply: "👋 Hi! I'm SwapBot, your assistant here at SwapLearnThrive. I'm currently being set up — the admin needs to configure my AI brain (Gemini API key). In the meantime, here are some quick links:\n\n• **Find skills to learn** → /learn\n• **Offer your skills** → /teach\n• **Check your matches** → /matches\n• **View messages** → /messages\n\nFeel free to explore the platform!"
       });
@@ -108,37 +139,34 @@ router.post('/', auth, async (req, res) => {
       parts: [{ text: message }]
     });
 
-    // Call Gemini API
-    const response = await fetch(`${GEMINI_URL}${GEMINI_API_KEY}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        system_instruction: {
-          parts: [{ text: SYSTEM_PROMPT }]
-        },
-        contents,
-        generationConfig: {
-          temperature: 0.7,
-          topP: 0.9,
-          topK: 40,
-          maxOutputTokens: 512,
-        },
-        safetySettings: [
-          { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-          { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-          { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-          { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-        ]
-      })
+    // Call Gemini API using Node.js https module (works on all Node versions)
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
+
+    const result = await postJSON(geminiUrl, {
+      system_instruction: {
+        parts: [{ text: SYSTEM_PROMPT }]
+      },
+      contents,
+      generationConfig: {
+        temperature: 0.7,
+        topP: 0.9,
+        topK: 40,
+        maxOutputTokens: 512,
+      },
+      safetySettings: [
+        { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+        { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+        { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+        { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+      ]
     });
 
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error('Gemini API error:', response.status, errorData);
+    if (result.status !== 200) {
+      console.error('Gemini API error:', result.status, result.body);
       return res.status(502).json({ message: 'AI service temporarily unavailable. Please try again.' });
     }
 
-    const data = await response.json();
+    const data = JSON.parse(result.body);
     const reply = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
     if (!reply) {
