@@ -126,7 +126,7 @@ router.post('/', auth, async (req, res) => {
 
     // Make the request to OpenRouter
     const result = await postJSON('https://openrouter.ai/api/v1/chat/completions', {
-      model: "google/gemini-2.0-flash-lite-preview-02-05:free", // Guarantee a 100% free model from OpenRouter
+      model: "google/gemini-2.0-flash:free", // Reliable free OpenRouter model
       messages,
       temperature: 0.7,
       max_tokens: 500
