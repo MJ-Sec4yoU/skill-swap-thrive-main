@@ -4,7 +4,7 @@ const { auth } = require('../middleware/auth');
 const router = express.Router();
 
 // ── Gemini 2.0 Flash (free tier) ────────────────────────────────────────────
-const GEMINI_MODEL = 'gemini-1.5-flash';
+const GEMINI_MODEL = 'gemini-2.0-flash';
 
 // Helper: make HTTPS POST request (works on all Node.js versions)
 function postJSON(url, body) {
