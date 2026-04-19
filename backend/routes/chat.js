@@ -124,36 +124,49 @@ router.post('/', auth, async (req, res) => {
     // 3. Add current prompt
     messages.push({ role: 'user', content: message });
 
-    // Make the request to OpenRouter
-    const result = await postJSON('https://openrouter.ai/api/v1/chat/completions', {
-      model: "google/gemini-2.0-flash:free", // Reliable free OpenRouter model
-      messages,
-      temperature: 0.7,
-      max_tokens: 500
-    }, apiKey);
+    // Make the request to OpenRouter with fallback models
+    const FREE_MODELS = [
+      "meta-llama/llama-3.3-70b-instruct:free",
+      "qwen/qwen3-coder:free",
+      "google/gemma-3-27b-it:free",
+    ];
 
-    // Fallback error parsing
-    if (result.status !== 200) {
-      console.error('OpenRouter API error:', result.status, result.body);
-      let errorMsg = 'AI service temporarily unavailable.';
-      try {
-        const parsed = JSON.parse(result.body);
-        errorMsg = `API Error: ${parsed.error?.message || result.statusText}`;
-      } catch (e) {
-        errorMsg = `API Error (${result.status}): ${result.body}`;
+    let lastError = null;
+
+    for (const model of FREE_MODELS) {
+      const result = await postJSON('https://openrouter.ai/api/v1/chat/completions', {
+        model,
+        messages,
+        temperature: 0.7,
+        max_tokens: 500
+      }, apiKey);
+
+      if (result.status === 200) {
+        const data = JSON.parse(result.body);
+        const reply = data.choices?.[0]?.message?.content;
+        if (reply) {
+          return res.json({ reply });
+        }
       }
-      return res.status(502).json({ message: errorMsg });
+
+      console.error(`Model ${model} failed:`, result.status, result.body);
+      lastError = result;
     }
 
-    // Extract reply
-    const data = JSON.parse(result.body);
-    const reply = data.choices?.[0]?.message?.content;
-
-    if (!reply) {
-      return res.status(502).json({ message: 'No response from AI. Please try again.' });
+    // All models failed
+    let errorMsg = 'All AI models are temporarily busy. Please try again in a moment.';
+    if (lastError) {
+      try {
+        const parsed = JSON.parse(lastError.body);
+        errorMsg = `API Error: ${parsed.error?.message || 'Unknown error'}`;
+      } catch (e) {
+        errorMsg = `API Error (${lastError.status})`;
+      }
     }
+    return res.status(502).json({ message: errorMsg });
 
-    res.json({ reply });
+
+
 
   } catch (error) {
     console.error('Chat route error:', error);
