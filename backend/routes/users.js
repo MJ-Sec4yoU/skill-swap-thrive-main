@@ -182,6 +182,16 @@ router.put('/profile', auth, conditionalUpload, userValidation.updateProfile, as
       console.log('Avatar uploaded successfully:', req.file.filename, 'for user:', user._id);
     }
 
+    // Name
+    if (typeof incoming.name === 'string' && incoming.name.trim() !== '') {
+      user.name = incoming.name.trim();
+    }
+
+    // Email (Note: usually requires re-verification, but allowing for now)
+    if (typeof incoming.email === 'string' && incoming.email.trim() !== '') {
+      user.email = incoming.email.trim();
+    }
+
     // Bio
     if (typeof incoming.bio === 'string') {
       user.profile = user.profile || {};
