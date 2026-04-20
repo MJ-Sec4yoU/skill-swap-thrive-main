@@ -29,9 +29,9 @@ const Onboarding = () => {
     bio: "",
     skillsToTeach: [] as string[],
     skillsToLearn: [] as string[],
-    availability: [],
-    languages: [] as string[],
-    timezone: "UTC"
+    availability: {} as Record<string, { enabled: boolean; start: string; end: string }>,
+    languages: "",
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"
   });
   const [newSkill, setNewSkill] = useState("");
   const navigate = useNavigate();
@@ -115,6 +115,15 @@ const Onboarding = () => {
         if (profile.avatar) {
           formData.append("avatar", profile.avatar);
         }
+
+        // Send availability, languages, and timezone
+        if (Object.keys(profile.availability).length > 0) {
+          formData.append("availability", JSON.stringify(profile.availability));
+        }
+        if (profile.languages.trim()) {
+          formData.append("languages", profile.languages.trim());
+        }
+        formData.append("timezone", profile.timezone);
 
         // Calculate profile completion
         let completion = 0;
@@ -357,27 +366,68 @@ const Onboarding = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Timezone</Label>
-                  <Input value="UTC-5 (Eastern Time)" readOnly />
+                  <Input 
+                    value={profile.timezone} 
+                    onChange={(e) => setProfile(prev => ({ ...prev, timezone: e.target.value }))}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Languages</Label>
-                  <Input placeholder="English, Spanish..." />
+                  <Input 
+                    placeholder="English, Hindi, Marathi..." 
+                    value={profile.languages}
+                    onChange={(e) => setProfile(prev => ({ ...prev, languages: e.target.value }))}
+                  />
                 </div>
               </div>
 
               <div className="space-y-4">
                 <Label>Weekly Availability</Label>
                 <div className="grid grid-cols-1 gap-2">
-                  {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => (
-                    <div key={day} className="flex items-center justify-between p-3 border border-border rounded-lg">
-                      <span className="font-medium">{day}</span>
-                      <div className="flex gap-2">
-                        <input type="time" className="text-sm p-1 border rounded" defaultValue="09:00" />
-                        <span className="text-muted-foreground">to</span>
-                        <input type="time" className="text-sm p-1 border rounded" defaultValue="17:00" />
+                  {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => {
+                    const dayData = profile.availability[day] || { enabled: true, start: '09:00', end: '17:00' };
+                    return (
+                      <div key={day} className={`flex items-center justify-between p-3 border rounded-lg transition-colors ${
+                        dayData.enabled ? 'border-primary/30 bg-primary/5' : 'border-border opacity-50'
+                      }`}>
+                        <div className="flex items-center gap-3">
+                          <input 
+                            type="checkbox" 
+                            checked={dayData.enabled} 
+                            onChange={(e) => setProfile(prev => ({
+                              ...prev,
+                              availability: { ...prev.availability, [day]: { ...dayData, enabled: e.target.checked } }
+                            }))}
+                            className="w-4 h-4 rounded"
+                          />
+                          <span className="font-medium text-sm">{day}</span>
+                        </div>
+                        {dayData.enabled && (
+                          <div className="flex items-center gap-2">
+                            <input 
+                              type="time" 
+                              className="text-sm p-1 border rounded" 
+                              value={dayData.start}
+                              onChange={(e) => setProfile(prev => ({
+                                ...prev,
+                                availability: { ...prev.availability, [day]: { ...dayData, start: e.target.value } }
+                              }))}
+                            />
+                            <span className="text-muted-foreground text-sm">to</span>
+                            <input 
+                              type="time" 
+                              className="text-sm p-1 border rounded" 
+                              value={dayData.end}
+                              onChange={(e) => setProfile(prev => ({
+                                ...prev,
+                                availability: { ...prev.availability, [day]: { ...dayData, end: e.target.value } }
+                              }))}
+                            />
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 
