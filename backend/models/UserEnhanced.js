@@ -41,21 +41,17 @@ const userSchema = new mongoose.Schema({
       twitter: String,
       github: String
     },
-    languages: [{
-      language: String,
-      proficiency: {
-        type: String,
-        enum: ['Basic', 'Conversational', 'Fluent', 'Native']
-      }
-    }],
+    languages: {
+      type: mongoose.Schema.Types.Mixed,
+      default: ''
+    },
     timezone: {
       type: String,
       default: 'UTC'
     },
     availability: {
-      type: String,
-      enum: ['Weekdays', 'Weekends', 'Flexible'],
-      default: 'Flexible'
+      type: mongoose.Schema.Types.Mixed,
+      default: {}
     },
     preferences: {
       remoteOnly: { type: Boolean, default: false },
