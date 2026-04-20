@@ -111,13 +111,6 @@ export const profileUpdateSchema = z.object({
     .array(z.string().min(1).max(50, 'Skill name must be less than 50 characters'))
     .max(10, 'You can learn maximum 10 skills')
     .optional(),
-  availability: z
-    .enum(['Weekdays', 'Weekends', 'Flexible'])
-    .optional(),
-  timezone: z
-    .string()
-    .max(100, 'Timezone must be less than 100 characters')
-    .optional(),
   preferences: z
     .object({
       remoteOnly: z.boolean().optional(),

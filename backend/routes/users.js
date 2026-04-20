@@ -204,30 +204,6 @@ router.put('/profile', auth, conditionalUpload, userValidation.updateProfile, as
       user.profile.location = incoming.location;
     }
 
-    // Availability (may come as JSON string from FormData)
-    if (incoming.availability) {
-      user.profile = user.profile || {};
-      try {
-        user.profile.availability = typeof incoming.availability === 'string' 
-          ? JSON.parse(incoming.availability) 
-          : incoming.availability;
-      } catch (e) {
-        console.error('Error parsing availability:', e);
-      }
-    }
-
-    // Languages
-    if (typeof incoming.languages === 'string') {
-      user.profile = user.profile || {};
-      user.profile.languages = incoming.languages;
-    }
-
-    // Timezone
-    if (typeof incoming.timezone === 'string') {
-      user.profile = user.profile || {};
-      user.profile.timezone = incoming.timezone;
-    }
-
     // Social links
     if (incoming.socialLinks) {
       user.profile = user.profile || {};

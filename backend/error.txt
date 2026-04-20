@@ -1,0 +1,26 @@
+[dotenv@17.2.2] injecting env (12) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+NODE_ENV: development
+isDevelopment: true
+🌐 CORS Configuration:
+   Environment: Development
+   Allowed origins: localhost/127.0.0.1 (development mode)
+
+🔗 Attempting to connect to MongoDB...
+   URI: mongodb://localhost:27017/skillswap
+C:\Users\anonymous07\OneDrive\Desktop\skill swap\backend\node_modules\razorpay\dist\razorpay.js:34
+      throw new Error('`key_id` or `oauthToken` is mandatory');
+      ^
+
+Error: `key_id` or `oauthToken` is mandatory
+    at new Razorpay (C:\Users\anonymous07\OneDrive\Desktop\skill swap\backend\node_modules\razorpay\dist\razorpay.js:34:13)
+    at Object.<anonymous> (C:\Users\anonymous07\OneDrive\Desktop\skill swap\backend\routes\payments-razorpay.js:9:18)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1487:12)
+    at require (node:internal/modules/helpers:135:16)
+
+Node.js v22.17.0

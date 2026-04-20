@@ -1,0 +1,7 @@
+SMTP_USER: SET
+SMTP_PASS: SET
+FROM_EMAIL: swaplearnthrive@gmail.com
+FAST2SMS_API_KEY: SET
+
+--- Testing Email OTP ---
+RESULT: Email OTP SUCCESS!

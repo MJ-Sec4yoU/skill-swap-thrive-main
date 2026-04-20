@@ -41,18 +41,6 @@ const userSchema = new mongoose.Schema({
       twitter: String,
       github: String
     },
-    languages: {
-      type: mongoose.Schema.Types.Mixed,
-      default: ''
-    },
-    timezone: {
-      type: String,
-      default: 'UTC'
-    },
-    availability: {
-      type: mongoose.Schema.Types.Mixed,
-      default: {}
-    },
     preferences: {
       remoteOnly: { type: Boolean, default: false },
       inPersonOnly: { type: Boolean, default: false },
@@ -249,9 +237,8 @@ userSchema.pre('save', function(next) {
   if (this.profile?.bio) completion += 10;
   
   // Profile details (30%)
-  if (this.profile?.avatar) completion += 10;
-  if (this.profile?.location) completion += 10;
-  if (this.profile?.languages?.length > 0) completion += 10;
+  if (this.profile?.avatar) completion += 15;
+  if (this.profile?.location) completion += 15;
   
   // Skills (40%)
   if (this.skillsTeaching?.length > 0) completion += 20;

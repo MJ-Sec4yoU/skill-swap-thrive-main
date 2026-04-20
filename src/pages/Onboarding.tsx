@@ -29,16 +29,13 @@ const Onboarding = () => {
     bio: "",
     skillsToTeach: [] as string[],
     skillsToLearn: [] as string[],
-    availability: {} as Record<string, { enabled: boolean; start: string; end: string }>,
-    languages: "",
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"
   });
   const [newSkill, setNewSkill] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
 
-  const totalSteps = 4;
+  const totalSteps = 3;
   const progressPercentage = (step / totalSteps) * 100;
 
   const popularSkills = [
@@ -115,15 +112,6 @@ const Onboarding = () => {
         if (profile.avatar) {
           formData.append("avatar", profile.avatar);
         }
-
-        // Send availability, languages, and timezone
-        if (Object.keys(profile.availability).length > 0) {
-          formData.append("availability", JSON.stringify(profile.availability));
-        }
-        if (profile.languages.trim()) {
-          formData.append("languages", profile.languages.trim());
-        }
-        formData.append("timezone", profile.timezone);
 
         // Calculate profile completion
         let completion = 0;
@@ -347,94 +335,6 @@ const Onboarding = () => {
                     </Badge>
                   ))}
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        );
-
-      case 4:
-        return (
-          <Card>
-            <CardHeader className="text-center">
-              <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                <Calendar className="w-8 h-8 text-primary-foreground" />
-              </div>
-              <CardTitle>Availability & Preferences</CardTitle>
-              <CardDescription>When are you available for skill exchange sessions?</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Timezone</Label>
-                  <Input 
-                    value={profile.timezone} 
-                    onChange={(e) => setProfile(prev => ({ ...prev, timezone: e.target.value }))}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Languages</Label>
-                  <Input 
-                    placeholder="English, Hindi, Marathi..." 
-                    value={profile.languages}
-                    onChange={(e) => setProfile(prev => ({ ...prev, languages: e.target.value }))}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <Label>Weekly Availability</Label>
-                <div className="grid grid-cols-1 gap-2">
-                  {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => {
-                    const dayData = profile.availability[day] || { enabled: true, start: '09:00', end: '17:00' };
-                    return (
-                      <div key={day} className={`flex items-center justify-between p-3 border rounded-lg transition-colors ${
-                        dayData.enabled ? 'border-primary/30 bg-primary/5' : 'border-border opacity-50'
-                      }`}>
-                        <div className="flex items-center gap-3">
-                          <input 
-                            type="checkbox" 
-                            checked={dayData.enabled} 
-                            onChange={(e) => setProfile(prev => ({
-                              ...prev,
-                              availability: { ...prev.availability, [day]: { ...dayData, enabled: e.target.checked } }
-                            }))}
-                            className="w-4 h-4 rounded"
-                          />
-                          <span className="font-medium text-sm">{day}</span>
-                        </div>
-                        {dayData.enabled && (
-                          <div className="flex items-center gap-2">
-                            <input 
-                              type="time" 
-                              className="text-sm p-1 border rounded" 
-                              value={dayData.start}
-                              onChange={(e) => setProfile(prev => ({
-                                ...prev,
-                                availability: { ...prev.availability, [day]: { ...dayData, start: e.target.value } }
-                              }))}
-                            />
-                            <span className="text-muted-foreground text-sm">to</span>
-                            <input 
-                              type="time" 
-                              className="text-sm p-1 border rounded" 
-                              value={dayData.end}
-                              onChange={(e) => setProfile(prev => ({
-                                ...prev,
-                                availability: { ...prev.availability, [day]: { ...dayData, end: e.target.value } }
-                              }))}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="p-4 bg-muted/50 rounded-lg">
-                <p className="text-sm text-muted-foreground">
-                  💡 Don't worry, you can always update your availability later in your profile settings.
-                </p>
               </div>
             </CardContent>
           </Card>
