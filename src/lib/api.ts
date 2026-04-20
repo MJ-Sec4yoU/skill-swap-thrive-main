@@ -3,19 +3,24 @@ import { getUserFriendlyMessage } from './errorHandling';
 // Configure API and asset bases via Vite env; fall back to sensible dev defaults
 export const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:5000/api';
 
-// For asset URLs, we need to derive from API base in production but use localhost in development
-export const ASSET_BASE_URL = (import.meta as any).env?.VITE_APP_ENV === 'production' 
-  ? getAssetBaseUrlForProduction()
-  : `http://${window.location.hostname}:5000`;
-
-function getAssetBaseUrlForProduction(): string {
-  // In production, use the backend URL for assets
-  const apiUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:5000/api';
-  // Remove /api from the end to get the base URL
-  const baseUrl = apiUrl.replace(/\/api$/, '');
-  // Ensure we're using HTTPS in production
-  return baseUrl.replace(/^http:/, 'https:');
-}
+// For asset URLs, derive from API base URL (strip /api suffix)
+// Auto-detect production: if VITE_API_URL is set OR we're not on localhost, use production URL
+export const ASSET_BASE_URL = (() => {
+  const apiUrl = (import.meta as any).env?.VITE_API_URL || '';
+  
+  // If a VITE_API_URL is configured (meaning production/staging), derive asset base from it
+  if (apiUrl && !apiUrl.includes('localhost')) {
+    return apiUrl.replace(/\/api$/, '').replace(/^http:/, 'https:');
+  }
+  
+  // If we're running on a non-localhost domain (e.g. Vercel), still use production backend
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return apiUrl ? apiUrl.replace(/\/api$/, '').replace(/^http:/, 'https:') : 'https://skillswapbackend-ec63.onrender.com';
+  }
+  
+  // Development fallback
+  return `http://localhost:5000`;
+})();
 
 export const buildAssetUrl = (relativePath: string, cacheBust: boolean = false): string => {
   // If the path is already a full URL, return it as is
@@ -34,11 +39,8 @@ export const buildAssetUrl = (relativePath: string, cacheBust: boolean = false):
     cleanPath = `uploads/${relativePath}`;
   }
   
-  // Ensure HTTPS is used in production
-  const protocol = (import.meta as any).env?.VITE_APP_ENV === 'production' ? 'https:' : 'http:';
-  const baseWithProtocol = ASSET_BASE_URL.replace(/^https?:/, protocol);
-  const url = `${baseWithProtocol}/${cleanPath}`;
-  console.log('Building asset URL:', url, 'from path:', relativePath);
+  // Use ASSET_BASE_URL directly (already has correct protocol)
+  const url = `${ASSET_BASE_URL}/${cleanPath}`;
   return cacheBust ? `${url}?t=${Date.now()}` : url;
 };
 
