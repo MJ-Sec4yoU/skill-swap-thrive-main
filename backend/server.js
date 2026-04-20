@@ -55,6 +55,8 @@ const productionOrigins = [
   'https://skillswapthrive.netlify.app/',
   'https://skillswapfontend.netlify.app',
   'https://skillswapfontend.netlify.app/',
+  'https://skill-swap-thrive-main.vercel.app',
+  'https://skill-swap-thrive-main.vercel.app/',
 ].filter(Boolean); // Remove undefined/empty values
 
 const allowedOrigins = isDevelopment ? developmentOrigins : productionOrigins;
