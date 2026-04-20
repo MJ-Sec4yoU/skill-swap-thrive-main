@@ -50,36 +50,49 @@ const CertificateCard = ({ userName, skillName, date, mentorName, isPreview = fa
         alignItems: "center",
         pointerEvents: "none",
       }}>
-        {/* Full Name - positioned where "Full Name Here" appears */}
+        {/* Full Name - fits between "THIS IS TO CERTIFY THAT" (~25%) and "has successfully mastered" (~42%) */}
         <div style={{
           position: "absolute",
-          top: "33%",
+          top: "30%",
           left: "50%",
           transform: "translateX(-50%)",
           textAlign: "center",
-          width: "70%",
+          width: "80%",
+          maxHeight: "12%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}>
           <h2 style={{
-            fontSize: "clamp(24px, 4vw, 42px)",
+            fontSize: "clamp(16px, 3vw, 32px)",
             fontWeight: "700",
             margin: 0,
+            lineHeight: "1.15",
             color: "#2d1248",
             fontFamily: "'Georgia', 'Times New Roman', serif",
             letterSpacing: "0.5px",
+            wordBreak: "keep-all",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
           }}>{userName}</h2>
         </div>
 
-        {/* Course/Skill Name - positioned where "Course Name Here" pill appears */}
+        {/* Course/Skill Name - fits between "has successfully mastered" (~42%) and "under the guidance" (~56%) */}
         <div style={{
           position: "absolute",
-          top: "49%",
+          top: "47%",
           left: "50%",
           transform: "translateX(-50%)",
           textAlign: "center",
           width: "60%",
+          maxHeight: "8%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}>
           <span style={{
-            fontSize: "clamp(16px, 2.5vw, 24px)",
+            fontSize: "clamp(14px, 2.2vw, 22px)",
             fontWeight: "700",
             color: "#3d1f5c",
             fontFamily: "'Georgia', serif",
